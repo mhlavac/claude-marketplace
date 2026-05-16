@@ -1,0 +1,22 @@
+{
+  "name": "mh",
+  "version": "1.0.0",
+  "description": "Personal Claude Code skill bundle by @mhlavac. Reusable primitives for collaborating with Claude on rich artifacts and multi-turn iteration loops.",
+  "author": {
+    "name": "mhlavac",
+    "url": "https://github.com/mhlavac"
+  },
+  "homepage": "https://github.com/mhlavac/claude-marketplace/tree/main/plugins/mh",
+  "license": "MIT",
+  "keywords": [
+    "annotation",
+    "feedback",
+    "artifact",
+    "iteration",
+    "html",
+    "form",
+    "mermaid",
+    "perfect-freehand",
+    "w3c-web-annotation"
+  ]
+}

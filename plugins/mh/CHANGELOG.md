@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the `annotated-feedback` plugin.
+All notable changes to the `mh` plugin.
 This project follows [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0] — 2026-05-16
@@ -9,7 +9,7 @@ Initial public release.
 
 ### Features
 
-- Skill `annotated-feedback` with auto-trigger description and slash invocation
+- Skill `mh:annotated-feedback` with auto-trigger description and slash invocation
 - HTML template with annotation overlay (text-highlight, pin, sketch, general comment) and `.af-q` form-element discovery (text, textarea, radio, checkbox, action)
 - Live right-side sidebar showing every form answer + annotation as the user types
 - Stdlib Python receiver server (`server.py`) — writes W3C-shaped JSON envelopes and paste-ready Markdown prompts to `feedback/`

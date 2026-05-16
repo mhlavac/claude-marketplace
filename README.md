@@ -1,15 +1,15 @@
 # mhlavac-marketplace
 
 A small [Claude Code](https://claude.com/code) plugin marketplace by
-[@mhlavac](https://github.com/mhlavac). Reusable primitives for collaborating
-with Claude on rich artifacts and multi-turn iteration loops, kept small
-enough to be droppable into someone else's setup.
+[@mhlavac](https://github.com/mhlavac). Ships a single plugin, `mh`, that
+bundles personal skills — reusable primitives for collaborating with Claude on
+rich artifacts and multi-turn iteration loops.
 
-## Plugins
+## Plugin
 
-| Plugin | What it does |
-|---|---|
-| [`annotated-feedback`](plugins/annotated-feedback) | Turn any HTML artifact into a structured-feedback surface — inline form elements (textareas, radios, checkboxes, action buttons) keyed by stable IDs, plus a freeform annotation overlay (text highlights, diagram pins, sketches, general comments). One Submit produces a paste-ready Markdown prompt for the next Claude turn. Mermaid + perfect-freehand vendored, zero CDN deps. |
+| Plugin | Skills | What it does |
+|---|---|---|
+| [`mh`](plugins/mh) | `mh:annotated-feedback` | Personal skill bundle — see the [plugin README](plugins/mh/README.md) for the current skill list. |
 
 ## Install
 
@@ -17,14 +17,14 @@ enough to be droppable into someone else's setup.
 
 ```
 /plugin marketplace add mhlavac/claude-marketplace
-/plugin install annotated-feedback@mhlavac-marketplace
+/plugin install mh@mhlavac-marketplace
 ```
 
 ### From a local clone
 
 ```
 /plugin marketplace add /path/to/your/clone/claude-marketplace
-/plugin install annotated-feedback@mhlavac-marketplace
+/plugin install mh@mhlavac-marketplace
 ```
 
 ### Update after changes
@@ -35,16 +35,13 @@ enough to be droppable into someone else's setup.
 
 ## Use after install
 
-Each plugin's skills are callable as `<plugin-name>:<skill-name>` — e.g. the
-`annotated-feedback` plugin's skill is invoked via
-`annotated-feedback:annotated-feedback` (plugin name + skill name; the skill
-happens to share the plugin's name here). It also auto-triggers based on its
-description when the agent decides it fits the task.
+All skills live under the `mh` plugin and are invoked as `mh:<skill-name>` —
+e.g. `mh:annotated-feedback`. Skills also auto-trigger based on their
+description when the agent decides they fit.
 
-See each plugin's own README + SKILL.md for usage details:
+See each skill's `SKILL.md` and `README.md` for details:
 
-- [`annotated-feedback` plugin README](plugins/annotated-feedback/README.md)
-- [`annotated-feedback` skill docs](plugins/annotated-feedback/skills/annotated-feedback/SKILL.md)
+- [`mh:annotated-feedback`](plugins/mh/skills/annotated-feedback/README.md)
 
 ## Compatibility
 
@@ -61,29 +58,34 @@ See each plugin's own README + SKILL.md for usage details:
 ├── .claude-plugin/
 │   └── marketplace.json           ← marketplace manifest
 ├── plugins/
-│   └── annotated-feedback/
+│   └── mh/
 │       ├── .claude-plugin/
-│       │   └── plugin.json        ← plugin manifest
-│       ├── README.md              ← plugin overview + quickstart
+│       │   └── plugin.json        ← plugin manifest (name: mh)
+│       ├── README.md              ← plugin overview + skill index
+│       ├── CHANGELOG.md           ← plugin-level changelog
 │       └── skills/
 │           └── annotated-feedback/
 │               ├── SKILL.md       ← the skill itself
+│               ├── README.md      ← skill-specific docs
 │               ├── assets/        ← template.html, server.py, vendor/
 │               ├── scripts/       ← new_artifact.py
 │               └── references/    ← form-elements.md, envelope-and-prompt.md
+├── CLAUDE.md                       ← repo rules (license, naming, commits)
+├── CONTRIBUTING.md                 ← contribution guide
+├── LICENSE                         ← MIT
 └── README.md                       ← this file
 ```
 
 ## Uninstall
 
 ```
-/plugin uninstall annotated-feedback@mhlavac-marketplace
+/plugin uninstall mh@mhlavac-marketplace
 /plugin marketplace remove mhlavac-marketplace
 ```
 
 ## Issues & contributions
 
-[github.com/mhlavac/claude-marketplace/issues](https://github.com/mhlavac/claude-marketplace/issues)
+[github.com/mhlavac/claude-marketplace/issues](https://github.com/mhlavac/claude-marketplace/issues) — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

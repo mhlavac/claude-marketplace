@@ -1,7 +1,7 @@
 # annotated-feedback
 
-A Claude Code plugin that turns any HTML artifact into a structured-feedback
-surface.
+A skill in the [`mh`](../../README.md) Claude Code plugin that turns any HTML
+artifact into a structured-feedback surface.
 
 The user reads, answers explicit form questions you embedded, annotates freely
 (highlight text, pin diagrams, sketch, leave general notes), hits one Submit
@@ -13,23 +13,26 @@ turn.
 
 ```
 /plugin marketplace add mhlavac/claude-marketplace
-/plugin install annotated-feedback@mhlavac-marketplace
+/plugin install mh@mhlavac-marketplace
 ```
+
+Invoke as `mh:annotated-feedback`, or let the agent auto-trigger it from the
+skill description.
 
 ## What's inside
 
-| | |
+| Piece | Where |
 |---|---|
-| **Skill** | [`annotated-feedback`](skills/annotated-feedback/SKILL.md) — invoked as `annotated-feedback:annotated-feedback` or auto-triggered when the agent decides the task fits |
-| **Template** | `skills/annotated-feedback/assets/template.html` — single-file HTML with the annotation overlay, form discovery, sidebar, vendored Mermaid + perfect-freehand |
-| **Server** | `skills/annotated-feedback/assets/server.py` — stdlib HTTP server, ~270 lines, no pip deps |
-| **Helper** | `skills/annotated-feedback/scripts/new_artifact.py` — one-shot scaffolder |
-| **Refs** | `skills/annotated-feedback/references/form-elements.md` (markup spec), `references/envelope-and-prompt.md` (envelope schema + prompt rendering) |
+| **Skill** | [`SKILL.md`](SKILL.md) — the skill body the agent reads |
+| **Template** | `assets/template.html` — single-file HTML with the annotation overlay, form discovery, sidebar, vendored Mermaid + perfect-freehand |
+| **Server** | `assets/server.py` — stdlib HTTP server, ~270 lines, no pip deps |
+| **Helper** | `scripts/new_artifact.py` — one-shot scaffolder |
+| **Refs** | `references/form-elements.md` (markup spec), `references/envelope-and-prompt.md` (envelope schema + prompt rendering) |
 
 ## 30-second quickstart
 
 ```bash
-# Scaffold a new artifact folder (after install, $CLAUDE_PLUGIN_ROOT points here)
+# Scaffold a new artifact folder (after install, $CLAUDE_PLUGIN_ROOT points to plugins/mh)
 python3 "$CLAUDE_PLUGIN_ROOT/skills/annotated-feedback/scripts/new_artifact.py" \
   ~/my-artifact --title "My Decision" --kicker "Design review"
 
@@ -81,12 +84,12 @@ This plugin vendors:
 - **[mermaid](https://github.com/mermaid-js/mermaid) 11.4.1** — MIT, +transitive deps under MIT / BSD / ISC / Apache-2.0 / MPL-2.0
 - **[perfect-freehand](https://github.com/steveruizok/perfect-freehand) 1.2.2** — MIT
 
-Full license texts: [`skills/annotated-feedback/assets/vendor/LICENSES/`](skills/annotated-feedback/assets/vendor/LICENSES/).
+Full license texts: [`assets/vendor/LICENSES/`](assets/vendor/LICENSES/).
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md).
+See the plugin-level [CHANGELOG.md](../../CHANGELOG.md).
 
 ## License
 
-[MIT](../../LICENSE)
+[MIT](../../../../LICENSE)

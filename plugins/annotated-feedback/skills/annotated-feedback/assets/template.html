@@ -6,9 +6,10 @@
 <title>{{TITLE}}</title>
 <style>
   /* ────────────────────────────────────────────────────────────────────
-     EDITORIAL DEFAULTS — agents can override per-artifact if needed
-     (the aesthetic that's worked for Martin: serif heads, warm paper,
-      sidebar TOC, verdict cards, callouts). Replace freely.
+     EDITORIAL DEFAULTS — agents can override per-artifact if needed.
+     An opinionated baseline (serif heads, warm paper, sidebar TOC,
+     verdict cards, callouts) that reads well as a long-form artifact.
+     Replace freely.
      ──────────────────────────────────────────────────────────────────── */
   :root{
     --ink:#16140f;
@@ -266,6 +267,7 @@
   if (window.mermaid){
     window.mermaid.initialize({
       startOnLoad: false,
+      securityLevel: 'strict',  // sanitise HTML in diagram labels (Mermaid default; locked here in case future versions change it)
       theme: 'base',
       themeVariables: {
         primaryColor: '#fff',

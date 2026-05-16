@@ -71,10 +71,10 @@ above the options.
   <fieldset>
     <legend class="af-q-label">Which risks should v2 address? (pick any)</legend>
     <div class="af-q-options">
-      <label><input type="checkbox" name="risks" value="latency">  Latency</label>
-      <label><input type="checkbox" name="risks" value="cost">     Cost</label>
-      <label><input type="checkbox" name="risks" value="privacy">  Privacy</label>
-      <label><input type="checkbox" name="risks" value="ux_kids">  Kid-UX edge cases</label>
+      <label><input type="checkbox" name="risks" value="latency">       Latency</label>
+      <label><input type="checkbox" name="risks" value="cost">          Cost</label>
+      <label><input type="checkbox" name="risks" value="privacy">       Privacy</label>
+      <label><input type="checkbox" name="risks" value="accessibility"> Accessibility</label>
     </div>
   </fieldset>
 </div>

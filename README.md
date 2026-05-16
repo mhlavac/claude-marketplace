@@ -1,10 +1,9 @@
 # mhlavac-marketplace
 
-Personal [Claude Code](https://claude.com/code) plugin marketplace by Martin Hlavac.
-
-Reusable primitives for collaborating with Claude on rich artifacts, periodic
-notes, and family flows — extracted from a working personal vault, kept
-small enough to be droppable into someone else's setup.
+A small [Claude Code](https://claude.com/code) plugin marketplace by
+[@mhlavac](https://github.com/mhlavac). Reusable primitives for collaborating
+with Claude on rich artifacts and multi-turn iteration loops, kept small
+enough to be droppable into someone else's setup.
 
 ## Plugins
 
@@ -14,19 +13,17 @@ small enough to be droppable into someone else's setup.
 
 ## Install
 
-### From GitHub (once pushed)
+### From GitHub
 
 ```
-/plugin marketplace add martinhlavac/claude-marketplace
+/plugin marketplace add mhlavac/claude-marketplace
 /plugin install annotated-feedback@mhlavac-marketplace
 ```
 
-Replace `martinhlavac` with the actual GitHub owner once the repo is public.
-
-### From a local clone (development / pre-publish)
+### From a local clone
 
 ```
-/plugin marketplace add ~/Personal/Workspace/claude-marketplace
+/plugin marketplace add /path/to/your/clone/claude-marketplace
 /plugin install annotated-feedback@mhlavac-marketplace
 ```
 
@@ -38,13 +35,24 @@ Replace `martinhlavac` with the actual GitHub owner once the repo is public.
 
 ## Use after install
 
-Each plugin's skills become callable as `<plugin-name>:<skill-name>` — e.g.
-the `annotated-feedback` plugin's skill is invoked via `annotated-feedback:annotated-feedback`,
-or auto-triggers based on its description when the agent decides it fits the task.
+Each plugin's skills are callable as `<plugin-name>:<skill-name>` — e.g. the
+`annotated-feedback` plugin's skill is invoked via
+`annotated-feedback:annotated-feedback` (plugin name + skill name; the skill
+happens to share the plugin's name here). It also auto-triggers based on its
+description when the agent decides it fits the task.
 
-See each plugin's own README / SKILL.md for usage details:
+See each plugin's own README + SKILL.md for usage details:
 
+- [`annotated-feedback` plugin README](plugins/annotated-feedback/README.md)
 - [`annotated-feedback` skill docs](plugins/annotated-feedback/skills/annotated-feedback/SKILL.md)
+
+## Compatibility
+
+- **Python 3.10+** for the bundled server scripts (stdlib only — no pip/uv).
+- **Modern Chromium/Firefox/Safari** (released mid-2024 or later) for the
+  artifact-side JS (uses CSS Custom Highlight API, native `<dialog>`, ES
+  modules).
+- **Claude Code** with plugin support.
 
 ## Structure
 
@@ -56,6 +64,7 @@ See each plugin's own README / SKILL.md for usage details:
 │   └── annotated-feedback/
 │       ├── .claude-plugin/
 │       │   └── plugin.json        ← plugin manifest
+│       ├── README.md              ← plugin overview + quickstart
 │       └── skills/
 │           └── annotated-feedback/
 │               ├── SKILL.md       ← the skill itself
@@ -65,10 +74,17 @@ See each plugin's own README / SKILL.md for usage details:
 └── README.md                       ← this file
 ```
 
+## Uninstall
+
+```
+/plugin uninstall annotated-feedback@mhlavac-marketplace
+/plugin marketplace remove mhlavac-marketplace
+```
+
+## Issues & contributions
+
+[github.com/mhlavac/claude-marketplace/issues](https://github.com/mhlavac/claude-marketplace/issues)
+
 ## License
 
 [MIT](LICENSE) — fork, copy, adapt freely.
-
-## Contact
-
-baldur.e@gmail.com

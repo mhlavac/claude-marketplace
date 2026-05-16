@@ -1,35 +1,28 @@
 ---
 name: annotated-feedback
 description: |
-  Ship any HTML artifact (architecture doc, design proposal, decision card, /me:daily
-  conversation page, code-review summary) wired to receive **two complementary channels
-  of user feedback in a single envelope**: (1) explicit form elements that you embed
-  inline — textareas, radio groups, checkboxes, action buttons — keyed by stable
-  question IDs so you can ask Martin specific things; and (2) a freeform annotation
-  overlay — highlight-then-comment on any text, drop pinned notes on diagrams/tables/
-  callouts, free-form sketch on top of anything, plus un-anchored "general" comments.
-  Both channels surface live in a single right-side panel and submit together. A small
-  stdlib Python server receives the envelope and writes a paste-ready Markdown prompt
-  you can hand straight to the next Claude turn.
+  Ship any HTML artifact (architecture doc, design proposal, decision card,
+  periodic-note conversation page, code-review summary) wired to receive **two
+  complementary channels of user feedback in a single envelope**: (1) explicit
+  form elements that you embed inline — textareas, radio groups, checkboxes,
+  action buttons — keyed by stable question IDs so you can ask the user specific
+  things; and (2) a freeform annotation overlay — highlight-then-comment on any
+  text, drop pinned notes on diagrams/tables/callouts, free-form sketch on top
+  of anything, plus un-anchored "general" comments. Both channels surface live
+  in a single right-side panel and submit together. A small stdlib Python server
+  receives the envelope and writes a paste-ready Markdown prompt you can hand
+  straight to the next Claude turn.
 
-  **Trigger this skill aggressively whenever the agent is producing a non-trivial
-  HTML artifact that the user will want to react to** — architecture docs, multi-option
-  decisions, design reviews, daily/weekly conversation pages, research synthesis,
-  proposed plans, code-review write-ups, anything where "what do you think?" is the
-  right next move. Also trigger when the user says "ask me", "build a form for", "let
-  me annotate", "let me sketch on this", "make it interactive", "wire it to a server",
-  "iterate with me", "give me a v2 after I look at it", or references the
-  annotation-tooling under `30 Areas/Me/Projects/🎨 Artifact Annotation/`.
+  **Use this skill when the agent is producing a non-trivial HTML artifact the
+  user will want to react to** — architecture docs, multi-option decisions,
+  design reviews, daily/weekly conversation pages, research synthesis, proposed
+  plans, code-review write-ups, anything where "what do you think?" is the
+  right next move. Also trigger when the user says "ask me", "build a form
+  for", "let me annotate", "let me sketch on this", "make it interactive",
+  "wire it to a server", "iterate with me", or "give me a v2 after I look at it".
 
-  Cross-pollinates with /me:daily and other periodic-note flows that already use the
-  HTML-card + tiny-server + wait-loop pattern — this skill is the generalized primitive
-  they should converge on.
-
-  Skip for plain prose answers, simple file edits, terminal-only tasks, or anything
-  where a Markdown reply is enough.
-metadata:
-  node_type: skill
-  type: tool
+  Skip for plain prose answers, simple file edits, terminal-only tasks, or
+  anything where a Markdown reply is enough.
 ---
 
 # annotated-feedback
@@ -55,22 +48,33 @@ not their thumbs-up. Use this skill if any of these are true:
 
 ### 1. Create a working folder for the artifact
 
-Pick a path in the vault that reflects the artifact's home, e.g.
-`30 Areas/<Area>/Projects/<thing>/` or `60 Periodic Notes/Conversations/`.
-The submissions land next to the artifact, so put it where you'd want the
-audit trail to live.
+Pick a folder where the artifact + its feedback audit trail should live —
+typically a project subfolder (`~/projects/my-thing/feedback-round-1/`),
+a periodic-note folder, or a scratch dir. The submissions land next to the
+artifact, so put it where you want the audit trail.
 
-Copy the template:
+The recommended way is the helper script — it copies template + server +
+vendored JS in one shot:
 
 ```bash
-SKILL="$HOME/Personal/MyNotes/.claude/skills/annotated-feedback"
+# $CLAUDE_PLUGIN_ROOT is set by Claude Code when invoking a plugin's skill
+SKILL="$CLAUDE_PLUGIN_ROOT/skills/annotated-feedback"
 OUT="<absolute path to your artifact folder>"
-mkdir -p "$OUT/feedback"
-cp "$SKILL/assets/template.html" "$OUT/index.html"
-cp "$SKILL/assets/server.py"    "$OUT/server.py"
+python3 "$SKILL/scripts/new_artifact.py" "$OUT" --title "..." --kicker "..." --deck "..."
 ```
 
-Or use the helper: `python3 "$SKILL/scripts/new_artifact.py" "$OUT"`.
+If `$CLAUDE_PLUGIN_ROOT` isn't set (running outside the plugin runtime), point
+`$SKILL` at wherever this skill's directory lives on your machine — see the
+file tree at the bottom of this doc.
+
+Manual copy (only if the helper doesn't fit):
+
+```bash
+mkdir -p "$OUT/feedback" "$OUT/vendor"
+cp    "$SKILL/assets/template.html" "$OUT/index.html"
+cp    "$SKILL/assets/server.py"     "$OUT/server.py"
+cp -R "$SKILL/assets/vendor/"*      "$OUT/vendor/"
+```
 
 ### 2. Fill in content + embed form questions
 
@@ -101,11 +105,11 @@ flowchart LR
 It renders to inline SVG via the vendored Mermaid (`assets/vendor/mermaid.min.js`,
 pinned to 11.4.1) with the doc's editorial palette. **The annotation overlay
 pins anchor to specific nodes/edges inside the rendered SVG** (CSS-path
-selectors target `.mermaid g.node` / `g.edge` / `g.cluster`), so Martin can
-point at the *exact arrow that should move* rather than at the diagram as a
-whole. Supported diagram types: flowchart, sequence, class, state, ER, gantt,
-pie, mindmap, timeline — see the [Mermaid docs](https://mermaid.js.org/intro/syntax-reference.html)
-for the syntax of each.
+selectors target `.mermaid g.node` / `g.edge` / `g.cluster`), so the reviewer
+can point at the *exact arrow that should move* rather than at the diagram as
+a whole. Supported diagram types: flowchart, sequence, class, state, ER,
+gantt, pie, mindmap, timeline — see the
+[Mermaid docs](https://mermaid.js.org/intro/syntax-reference.html) for syntax.
 
 ### 3. Start the server in the background
 
@@ -200,14 +204,21 @@ envelope and a `.prompt.md` rendering — that's what the next Claude turn reads
 
 Full schema and rendering rules in **[references/envelope-and-prompt.md](references/envelope-and-prompt.md)**.
 
-## Cross-pollination with /me:daily and friends
+## Composing with multi-agent flows
 
-The `/me:daily` v2 flow already uses the HTML-card + tiny-server + wait-loop pattern,
-but with un-typed form fields, no annotations, and no prompt rendering. This skill
-is the generalized version. New flows should adopt this skill from day one;
-`/me:daily` can migrate later — its three persona fragments would slot into
-`<main id="af-content">` and its existing `frau_studi.*` / `bill.*` / `cal.*`
-field names map to `data-q-id` attributes. The wait-loop pattern is identical.
+If multiple agents need to ask their own questions on the same page (e.g. a
+daily-note conversation page where several subagents each contribute one
+fragment), namespace question IDs as `<agent>__<field>` (double underscore):
+
+```
+planner__phase_1_decision
+researcher__items_to_keep
+reviewer__open_concerns
+```
+
+The orchestrating agent can then split `form_responses` by ID prefix and route
+each slice to the right subagent (e.g. via `SendMessage`). See the envelope
+reference for the dispatch pattern.
 
 ## What the user sees
 
@@ -233,14 +244,27 @@ inside the doc auto-submits with that action recorded. All inputs persist in
 ## Files in this skill
 
 ```
-.claude/skills/annotated-feedback/
-├── SKILL.md                           ← you are here
+<plugin-root>/skills/annotated-feedback/
+├── SKILL.md                              ← you are here
 ├── assets/
-│   ├── template.html                  ← copy this to make a new artifact
-│   └── server.py                      ← stdlib HTTP server, copy alongside
+│   ├── template.html                     ← copy this to make a new artifact
+│   ├── server.py                         ← stdlib HTTP server (Python 3.10+)
+│   └── vendor/
+│       ├── mermaid.min.js                ← diagram rendering (MIT, v11.4.1)
+│       ├── perfect-freehand.mjs          ← stroke smoothing (MIT, v1.2.2)
+│       └── LICENSES/                     ← third-party attribution
 ├── scripts/
-│   └── new_artifact.py                ← one-shot: copies template + sets up folder
+│   └── new_artifact.py                   ← one-shot scaffolder
 └── references/
-    ├── form-elements.md               ← the af-q markup spec (read first time)
-    └── envelope-and-prompt.md         ← envelope schema + prompt rendering rules
+    ├── form-elements.md                  ← the af-q markup spec (read first time)
+    └── envelope-and-prompt.md            ← envelope schema + prompt rendering rules
 ```
+
+## Compatibility
+
+- **Python**: 3.10+ (uses `match`-style guards, `is_relative_to`, modern stdlib).
+- **Browser**: any current Chromium/Firefox/Safari released after mid-2024
+  (uses CSS Custom Highlight API for text annotations, `<dialog>` for the
+  comment popup, ES module imports for `perfect-freehand`).
+- **Server**: binds to `127.0.0.1` only. No auth — this is a single-user
+  local tool. Submission is CSRF-guarded (Origin check + JSON-only).

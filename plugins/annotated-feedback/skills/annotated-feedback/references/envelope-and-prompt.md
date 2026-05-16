@@ -177,17 +177,19 @@ The simplest pattern: the orchestrating agent reads the latest
 That file is human-readable and rich enough to drive substantive edits.
 
 For agents that want structured access (route specific form fields to specific
-subagents, like the /me:daily flow does with `frau_studi.*` / `bill.*` /
-`cal.*`), read the corresponding `.json` and dispatch by `id` namespace:
+subagents — e.g. a multi-agent conversation page where several subagents each
+contribute one fragment), read the corresponding `.json` and dispatch by `id`
+namespace:
 
 ```python
 import json, pathlib, sys
 env = json.loads(pathlib.Path(sys.argv[1]).read_text())
 for q in env["form_responses"]:
-    agent_id, _, sub_field = q["id"].partition("__")  # e.g. "frau_studi__artur_q1"
+    agent_id, _, sub_field = q["id"].partition("__")  # e.g. "planner__phase_1_decision"
     ...  # route to that agent via SendMessage
 ```
 
 A simple naming convention like `<agent>__<field>` for question IDs is the
-recommended bridge to the multi-agent flows. It keeps the same UI primitive
-serving both "ask Martin one question" and "ask three agents three questions."
+recommended bridge to multi-agent flows. It keeps the same UI primitive
+serving both "ask the user one question" and "ask N agents their own questions
+in one page."

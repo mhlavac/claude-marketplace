@@ -1,12 +1,12 @@
 {
-  "$schema": "https://code.claude.com/schemas/plugin.json",
   "name": "annotated-feedback",
   "version": "1.0.0",
   "description": "Ship any HTML artifact wired to receive structured user feedback — inline form elements (textareas / radios / checkboxes / action buttons) keyed by stable IDs, plus a freeform annotation overlay (text highlights, diagram pins, sketches, general comments). One Submit produces a paste-ready Markdown prompt for the next Claude turn. Mermaid diagrams supported out of the box.",
   "author": {
-    "name": "Martin Hlavac",
-    "email": "baldur.e@gmail.com"
+    "name": "mhlavac",
+    "url": "https://github.com/mhlavac"
   },
+  "homepage": "https://github.com/mhlavac/claude-marketplace/tree/main/plugins/annotated-feedback",
   "license": "MIT",
   "keywords": [
     "annotation",

@@ -30,7 +30,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("output_dir")
     ap.add_argument("--title", default="Untitled artifact")
-    ap.add_argument("--kicker", default="Artifact · Hlavac")
+    ap.add_argument("--kicker", default="Artifact")
     ap.add_argument("--deck", default="One-line description of what this artifact is for.")
     args = ap.parse_args()
 

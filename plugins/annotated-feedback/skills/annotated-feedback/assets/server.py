@@ -183,11 +183,44 @@ class FeedbackHandler(http.server.BaseHTTPRequestHandler):
             pass
         self._send(404, b"not found", "text/plain; charset=utf-8")
 
+    # ------------------------------------------------------------------
+    # CSRF / DoS guards for POST /feedback
+    # ------------------------------------------------------------------
+    # The server binds to 127.0.0.1 — but any web page in the same browser
+    # can still issue a "simple" cross-origin POST against localhost.
+    # Without these checks, that page could write attacker-controlled
+    # .prompt.md files that the next Claude turn reads as instructions
+    # (prompt-injection via CSRF). Defenses:
+    #   1. Require Content-Type: application/json (forces a CORS preflight
+    #      for cross-origin POSTs, which we never answer → blocked. Simple
+    #      cross-origin POSTs with text/plain are rejected here.)
+    #   2. Require Origin to be null / http://127.0.0.1:<port> /
+    #      http://localhost:<port> — same-origin only.
+    #   3. Cap body size — runaway pages can't DoS our memory.
+    MAX_BODY_BYTES = 5 * 1024 * 1024  # 5 MB
+
+    def _allowed_origin(self) -> bool:
+        origin = self.headers.get("Origin", "").strip().lower()
+        if not origin or origin == "null":
+            return True
+        port = self.server.server_address[1]
+        return origin in {f"http://127.0.0.1:{port}", f"http://localhost:{port}"}
+
     def do_POST(self):
         if self.path != "/feedback":
             self._send(404, b"not found", "text/plain; charset=utf-8"); return
-        length = int(self.headers.get("Content-Length", "0"))
-        body = self.rfile.read(length).decode("utf-8") if length else "{}"
+        ctype = self.headers.get("Content-Type", "").split(";")[0].strip().lower()
+        if ctype != "application/json":
+            self._send(415, b"unsupported media type \xe2\x80\x94 application/json required", "text/plain; charset=utf-8"); return
+        if not self._allowed_origin():
+            self._send(403, b"forbidden \xe2\x80\x94 origin mismatch", "text/plain; charset=utf-8"); return
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            self._send(400, b"bad Content-Length", "text/plain; charset=utf-8"); return
+        if length <= 0 or length > self.MAX_BODY_BYTES:
+            self._send(413, b"payload too large or empty", "text/plain; charset=utf-8"); return
+        body = self.rfile.read(length).decode("utf-8")
         try:
             env = json.loads(body)
         except json.JSONDecodeError as e:

@@ -1,6 +1,9 @@
+perfect-freehand v1.2.2
+https://github.com/steveruizok/perfect-freehand
+
 MIT License
 
-Copyright (c) 2026 mhlavac
+Copyright (c) 2021 Stephen Ruiz Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

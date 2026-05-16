@@ -1,18 +1,17 @@
 {
-  "$schema": "https://code.claude.com/schemas/marketplace.json",
   "name": "mhlavac-marketplace",
   "owner": {
-    "name": "Martin Hlavac",
-    "email": "baldur.e@gmail.com"
+    "name": "mhlavac",
+    "url": "https://github.com/mhlavac"
   },
-  "description": "Reusable Claude Code plugins by Martin Hlavac — primitives for collaborating with Claude on rich artifacts, periodic notes, and family flows.",
+  "description": "Reusable Claude Code plugins — primitives for collaborating with Claude on rich artifacts and multi-turn iteration loops.",
   "plugins": [
     {
       "name": "annotated-feedback",
       "source": "./plugins/annotated-feedback",
-      "description": "Ship any HTML artifact wired to receive structured user feedback — inline form elements (textareas / radios / checkboxes / action buttons) keyed by stable IDs, plus a freeform annotation overlay (text highlights, diagram pins, sketches, general comments). One Submit produces a paste-ready Markdown prompt for the next Claude turn.",
+      "description": "Ship any HTML artifact wired to receive structured user feedback — inline form elements (textareas / radios / checkboxes / action buttons) keyed by stable IDs, plus a freeform annotation overlay (text highlights, diagram pins, sketches, general comments). One Submit produces a paste-ready Markdown prompt for the next Claude turn. Mermaid diagrams supported out of the box.",
       "category": "workflow",
-      "tags": ["artifact", "feedback", "annotation", "html", "iteration-loop"]
+      "tags": ["artifact", "feedback", "annotation", "html", "iteration-loop", "mermaid"]
     }
   ]
 }

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "mhlavac-marketplace",
+  "owner": {
+    "name": "Martin Hlavac",
+    "email": "baldur.e@gmail.com"
+  },
+  "description": "Reusable Claude Code plugins by Martin Hlavac — primitives for collaborating with Claude on rich artifacts, periodic notes, and family flows.",
+  "plugins": [
+    {
+      "name": "annotated-feedback",
+      "source": "./plugins/annotated-feedback",
+      "description": "Ship any HTML artifact wired to receive structured user feedback — inline form elements (textareas / radios / checkboxes / action buttons) keyed by stable IDs, plus a freeform annotation overlay (text highlights, diagram pins, sketches, general comments). One Submit produces a paste-ready Markdown prompt for the next Claude turn.",
+      "category": "workflow",
+      "tags": ["artifact", "feedback", "annotation", "html", "iteration-loop"]
+    }
+  ]
+}

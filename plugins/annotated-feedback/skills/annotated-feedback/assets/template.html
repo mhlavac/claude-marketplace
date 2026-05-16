@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  /* ────────────────────────────────────────────────────────────────────
+     EDITORIAL DEFAULTS — agents can override per-artifact if needed
+     (the aesthetic that's worked for Martin: serif heads, warm paper,
+      sidebar TOC, verdict cards, callouts). Replace freely.
+     ──────────────────────────────────────────────────────────────────── */
+  :root{
+    --ink:#16140f;
+    --ink-soft:#3b3730;
+    --paper:#f7f2e8;
+    --paper-deep:#efe8d9;
+    --rule:#d6cdb8;
+    --teal:#2f7466;          /* primary accent (form + annotation overlay) */
+    --teal-soft:#5a9b8d;
+    --coral:#c75640;         /* secondary accent (highlights, errors) */
+    --gold:#a8843a;
+    --serif:'Spectral','Iowan Old Style','Source Serif Pro','Georgia',serif;
+    --sans:'Inter','Helvetica Neue','Arial',sans-serif;
+    --mono:'JetBrains Mono','SF Mono','Menlo',monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;font-size:17px;-webkit-font-smoothing:antialiased}
+  body{padding:0 0 6rem;position:relative}
+  a{color:var(--teal);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:rgba(47,116,102,.4)}
+  a:hover{text-decoration-color:var(--teal)}
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:600;line-height:1.15;color:var(--ink);letter-spacing:-0.01em}
+  h1{font-size:clamp(2.2rem,4.5vw,3.4rem);font-weight:700;margin:0 0 .3rem;letter-spacing:-0.02em}
+  h2{font-size:clamp(1.4rem,3vw,2rem);margin:3rem 0 .8rem;padding-top:1.2rem;border-top:1px solid var(--rule)}
+  h3{font-size:1.15rem;margin:1.8rem 0 .5rem}
+  h4{font-size:.78rem;margin:1.2rem 0 .4rem;font-family:var(--sans);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft)}
+  p{margin:0 0 1rem}
+  code{font-family:var(--mono);font-size:.85em;background:var(--paper-deep);padding:.1em .35em;border-radius:3px}
+  pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--ink);color:var(--paper);padding:1.1rem 1.3rem;border-radius:6px;overflow:auto;margin:1.2rem 0}
+  pre code{background:transparent;padding:0;color:inherit;font-size:inherit}
+  blockquote{margin:1.5rem 0;padding:.2rem 0 .2rem 1.2rem;border-left:3px solid var(--teal);font-family:var(--serif);font-size:1.15rem;font-style:italic;color:var(--ink-soft)}
+  hr{border:0;border-top:1px solid var(--rule);margin:2.5rem 0}
+  table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-family:var(--sans);font-weight:700;text-transform:uppercase;font-size:.72rem;letter-spacing:.08em;color:var(--ink-soft);background:var(--paper-deep)}
+  .wrap{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+  header.masthead{padding:2rem 0 1rem;border-bottom:2px solid var(--ink);margin-bottom:2rem}
+  .kicker{font-family:var(--sans);font-size:.78rem;text-transform:uppercase;letter-spacing:.18em;color:var(--teal);font-weight:700;margin-bottom:1.2rem}
+  .deck{font-family:var(--serif);font-size:1.2rem;line-height:1.4;color:var(--ink-soft);max-width:42em;margin:1rem 0 1.5rem}
+
+  /* Mermaid diagram container — renders into SVG, fully annotatable */
+  .mermaid{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.2rem;margin:1.5rem 0;text-align:center;overflow:auto}
+  .mermaid svg{max-width:100%;height:auto}
+
+  /* ────────────────────────────────────────────────────────────────────
+     FORM QUESTIONS (.af-q) — explicit prompts the agent embeds inline
+     ──────────────────────────────────────────────────────────────────── */
+  .af-q{margin:1.4rem 0;padding:1.2rem 1.3rem;background:#fff;border:1px solid var(--rule);border-left:4px solid var(--teal);border-radius:4px;position:relative}
+  .af-q .af-q-label,.af-q legend.af-q-label{display:block;font-family:var(--sans);font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:0 0 .6rem;padding:0}
+  .af-q .af-q-help{font-size:.85rem;color:var(--ink-soft);margin:-.3rem 0 .6rem;font-style:italic}
+  .af-q textarea,.af-q input[type="text"]{width:100%;font:inherit;font-size:.95rem;padding:.6rem .7rem;border:1px solid var(--rule);border-radius:4px;font-family:var(--sans);resize:vertical;min-height:3em}
+  .af-q textarea:focus,.af-q input[type="text"]:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,116,102,.18)}
+  .af-q fieldset{border:0;margin:0;padding:0}
+  .af-q .af-q-options{display:flex;flex-wrap:wrap;gap:.6rem}
+  .af-q .af-q-options label{display:inline-flex;align-items:center;gap:.45rem;padding:.45rem .8rem;border:1px solid var(--rule);border-radius:99px;cursor:pointer;font-size:.88rem;background:#fff;transition:all .12s ease}
+  .af-q .af-q-options label:hover{border-color:var(--teal);background:var(--paper-deep)}
+  .af-q .af-q-options label:has(input:checked){background:var(--teal);color:white;border-color:var(--teal)}
+  .af-q .af-q-options input{accent-color:var(--teal)}
+  .af-q .af-q-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.3rem}
+  .af-q-action-note{margin-top:.6rem;padding:.5rem .7rem;background:var(--paper-deep);border-left:3px solid var(--teal);border-radius:0 4px 4px 0;font-size:.78rem;color:var(--ink-soft);font-style:italic;line-height:1.45}
+  .af-q-action-note strong{color:var(--ink);font-style:normal;font-weight:600}
+  .af-q .af-action{font:inherit;font-size:.85rem;font-weight:600;padding:.55rem 1.1rem;border-radius:5px;border:1px solid var(--teal);background:var(--teal);color:white;cursor:pointer;letter-spacing:.01em}
+  .af-q .af-action:hover{background:var(--coral);border-color:var(--coral)}
+  .af-q .af-action.af-action-defer,.af-q .af-action.af-action-secondary{background:#fff;color:var(--ink);border-color:var(--rule)}
+  .af-q .af-action.af-action-defer:hover,.af-q .af-action.af-action-secondary:hover{background:var(--paper-deep);border-color:var(--ink-soft);color:var(--ink)}
+
+  /* ════════════════════════════════════════════════════════════════════
+     ANNOTATION + INPUT PANEL LAYER (don't edit unless you know why)
+     ════════════════════════════════════════════════════════════════════ */
+  body[data-anno-mode="draw"]{user-select:none;-webkit-user-select:none}
+  body[data-anno-mode="pin"]{cursor:crosshair}
+  body[data-anno-mode="pin"] a{cursor:crosshair}
+  body[data-anno-mode="comment"]{cursor:text}
+  #anno-draw-svg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9988;overflow:visible}
+  body[data-anno-mode="draw"] #anno-draw-svg{pointer-events:auto;cursor:crosshair}
+
+  ::highlight(anno-text){background:rgba(199,86,64,.22);text-decoration:underline wavy rgba(199,86,64,.5);text-decoration-thickness:1px;text-underline-offset:3px}
+
+  .anno-pin{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--teal);color:white;display:flex;align-items:center;justify-content:center;font:700 11px var(--sans);cursor:pointer;z-index:9989;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.18);transform:translate(-50%,-50%);transition:transform .15s ease}
+  .anno-pin:hover{transform:translate(-50%,-50%) scale(1.15);background:var(--coral)}
+  .anno-pin.is-flash{animation:annoFlash .9s ease}
+  @keyframes annoFlash{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.6);box-shadow:0 0 0 8px rgba(199,86,64,.25)}}
+
+  #anno-toolbar{position:fixed;top:1rem;right:1rem;z-index:9995;display:flex;gap:.25rem;padding:.4rem;background:rgba(255,255,255,.96);border:1px solid var(--rule);border-radius:8px;box-shadow:0 6px 22px rgba(22,20,15,.12);backdrop-filter:blur(8px);font-family:var(--sans);font-size:.82rem;align-items:center;max-width:calc(100vw - 2rem);flex-wrap:wrap}
+  #anno-toolbar .anno-sep{width:1px;height:22px;background:var(--rule);margin:0 .2rem}
+  #anno-toolbar button{background:transparent;border:1px solid transparent;border-radius:5px;padding:.4rem .6rem;cursor:pointer;font-family:inherit;font-size:.82rem;color:var(--ink);line-height:1;display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap}
+  #anno-toolbar button .anno-ico{font-size:1rem;line-height:1}
+  #anno-toolbar button .anno-lbl{font-weight:600}
+  #anno-toolbar button:hover{background:var(--paper-deep);border-color:var(--rule)}
+  #anno-toolbar button.is-active{background:var(--teal);color:white;border-color:var(--teal)}
+  #anno-toolbar #af-total{display:inline-block;min-width:1.2em;text-align:center;font:600 .72rem var(--mono);background:var(--paper-deep);padding:.05rem .35rem;border-radius:99px;margin-left:.2rem}
+  #anno-toolbar button.is-active #af-total{background:rgba(255,255,255,.25);color:white}
+  #anno-toolbar button#anno-submit{background:var(--teal);color:white;font-weight:700;font-size:.82rem;padding:.45rem .95rem;letter-spacing:.02em}
+  #anno-toolbar button#anno-submit:hover{background:var(--coral)}
+  #anno-toolbar button#anno-submit:disabled{opacity:.5;cursor:wait}
+
+  #af-panel{position:fixed;top:4.2rem;right:1rem;width:360px;max-height:calc(100vh - 5.5rem);background:#fff;border:1px solid var(--rule);border-radius:8px;box-shadow:0 8px 32px rgba(22,20,15,.16);z-index:9994;display:flex;flex-direction:column;font-family:var(--sans);font-size:.85rem;overflow:hidden}
+  #af-panel[hidden]{display:none}
+  #af-panel header{display:flex;align-items:center;gap:.5rem;padding:.7rem .9rem;border-bottom:1px solid var(--rule);background:var(--paper-deep)}
+  #af-panel header h3{margin:0;font:700 .82rem var(--sans);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);flex:1}
+  #af-panel header button{background:transparent;border:0;cursor:pointer;color:var(--ink-soft);font-size:.78rem;padding:.2rem .4rem;border-radius:4px}
+  #af-panel header button:hover{background:white;color:var(--coral)}
+  #af-panel header button#anno-add-general{background:var(--teal);color:white;border-radius:4px;padding:.25rem .6rem;font-weight:600;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase}
+  #af-panel header button#anno-add-general:hover{background:var(--coral)}
+
+  .af-panel-section{border-bottom:1px solid var(--rule)}
+  .af-panel-section h4{display:flex;align-items:center;gap:.4rem;margin:0;padding:.55rem .9rem;font:700 .68rem var(--sans);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);background:#fdfaf2;cursor:pointer}
+  .af-panel-section h4::before{content:"▾";font-size:.6rem;color:var(--ink-soft);transition:transform .15s}
+  .af-panel-section.is-collapsed h4::before{transform:rotate(-90deg)}
+  .af-panel-section .af-panel-body{overflow-y:auto;max-height:42vh}
+  .af-panel-section.is-collapsed .af-panel-body{display:none}
+  .af-panel-section .af-section-count{margin-left:auto;font:700 .68rem var(--mono);background:var(--paper-deep);padding:.05rem .35rem;border-radius:99px}
+
+  #af-form-list,#af-anno-list{list-style:none;padding:0;margin:0}
+  #af-form-list li,#af-anno-list li{padding:.6rem .9rem;border-bottom:1px dotted var(--rule);cursor:pointer;transition:background .12s ease}
+  #af-form-list li:hover,#af-anno-list li:hover{background:var(--paper-deep)}
+  #af-form-list li:last-child,#af-anno-list li:last-child{border-bottom:0}
+  .af-fl-prompt{font-family:var(--sans);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:.2rem}
+  .af-fl-value{font-family:var(--serif);font-size:.92rem;color:var(--ink);white-space:pre-wrap;word-wrap:break-word}
+  .af-fl-value.is-empty{color:var(--ink-soft);font-style:italic;font-size:.85rem}
+  .af-fl-type{display:inline-block;font:600 .65rem var(--mono);background:var(--paper-deep);padding:.05rem .35rem;border-radius:3px;color:var(--ink-soft);margin-left:.3rem;text-transform:uppercase;letter-spacing:.05em}
+
+  #af-anno-list:empty::before{content:"No annotations yet. Pick a tool from the toolbar and click in the doc.";display:block;padding:1rem .9rem;color:var(--ink-soft);font-style:italic;text-align:center;font-size:.82rem}
+  #af-anno-list .anno-li-head{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem}
+  #af-anno-list .anno-li-head time{margin-left:auto;font-family:var(--mono);font-size:.68rem}
+  #af-anno-list .anno-li-del,#af-anno-list .anno-li-edit{margin-left:.2rem;border:0;background:transparent;color:var(--ink-soft);cursor:pointer;padding:.1rem .3rem;border-radius:3px;font-size:.85rem}
+  #af-anno-list .anno-li-edit:hover{background:var(--teal);color:white}
+  #af-anno-list .anno-li-del:hover{background:var(--coral);color:white}
+  #af-anno-list .anno-li-quote{font-family:var(--serif);font-style:italic;color:var(--ink-soft);font-size:.82rem;border-left:2px solid var(--teal-soft);padding-left:.5rem;margin-bottom:.3rem}
+  #af-anno-list .anno-li-body{color:var(--ink);white-space:pre-wrap;word-wrap:break-word;font-size:.88rem}
+  #af-anno-list .anno-li-body:empty::after{content:"(sketch with no comment)";color:var(--ink-soft);font-style:italic}
+
+  #af-panel footer{padding:.55rem .9rem;border-top:1px solid var(--rule);background:var(--paper-deep);font-size:.7rem;color:var(--ink-soft)}
+  #af-panel footer code{font-size:.68rem}
+
+  #anno-popup{padding:0;border:1px solid var(--rule);border-radius:8px;box-shadow:0 12px 40px rgba(22,20,15,.22);background:#fff;font-family:var(--sans);max-width:420px;width:90vw}
+  #anno-popup::backdrop{background:rgba(22,20,15,.32);backdrop-filter:blur(3px)}
+  #anno-popup form{display:flex;flex-direction:column;padding:1rem 1.1rem}
+  #anno-popup label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:.4rem}
+  #anno-popup .anno-popup-quote{font-family:var(--serif);font-style:italic;color:var(--ink-soft);font-size:.85rem;background:var(--paper-deep);padding:.5rem .7rem;border-left:3px solid var(--teal);border-radius:0 4px 4px 0;margin-bottom:.6rem;max-height:5em;overflow:auto}
+  #anno-popup textarea{font:inherit;font-size:.92rem;padding:.55rem .65rem;border:1px solid var(--rule);border-radius:4px;resize:vertical;min-height:3.5em;width:100%}
+  #anno-popup textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 2px rgba(47,116,102,.18)}
+  #anno-popup .anno-popup-buttons{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem}
+  #anno-popup button{font:inherit;font-size:.82rem;padding:.42rem .9rem;border-radius:4px;cursor:pointer;border:1px solid var(--rule);background:#fff;color:var(--ink)}
+  #anno-popup button[type="submit"]{background:var(--teal);color:white;border-color:var(--teal);font-weight:700}
+  #anno-popup button[type="submit"]:hover{background:var(--coral);border-color:var(--coral)}
+  #anno-popup button[type="button"]:hover{background:var(--paper-deep)}
+
+  #anno-flash{position:fixed;left:50%;top:1rem;transform:translateX(-50%) translateY(-200%);background:var(--ink);color:var(--paper);padding:.6rem 1.1rem;border-radius:6px;font-family:var(--sans);font-size:.85rem;z-index:9999;box-shadow:0 8px 24px rgba(22,20,15,.22);transition:transform .3s ease;max-width:60ch;text-align:center}
+  #anno-flash.is-visible{transform:translateX(-50%) translateY(0)}
+  #anno-flash.is-ok{background:var(--teal)}
+  #anno-flash.is-err{background:var(--coral)}
+
+  @media print{
+    #anno-toolbar,#af-panel,#anno-popup,#anno-draw-svg,#anno-flash{display:none!important}
+    .wrap{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     CONTENT AREA — agent fills this in. The annotation layer + form
+     discovery hooks into the whole DOM but treats `<main id="af-content">`
+     as the canonical scope for text-quote anchoring and form questions.
+
+     Use the .af-q markup defined in references/form-elements.md to embed
+     prompts the user can answer. Everything else is plain HTML.
+     ════════════════════════════════════════════════════════════════════ -->
+<main id="af-content" class="wrap">
+  <header class="masthead">
+    <div class="kicker">{{KICKER}}</div>
+    <h1>{{TITLE}}</h1>
+    <p class="deck">{{DECK}}</p>
+  </header>
+
+  <!-- AGENT: replace this stub with the actual artifact content. -->
+  <section>
+    <h2>Placeholder content</h2>
+    <p>This is a fresh artifact. Fill in your content here and embed <code>.af-q</code> question blocks where you want explicit input from the user.</p>
+    <div class="af-q" data-q-id="placeholder_sample" data-q-type="textarea" data-q-prompt="Sample question — replace me">
+      <label class="af-q-label">Sample question — replace me</label>
+      <p class="af-q-help">Type something here, then hit Submit in the top-right toolbar. The agent reads your text plus any highlights / pins / sketches you make.</p>
+      <textarea name="placeholder_sample" rows="3" placeholder="Your answer…"></textarea>
+    </div>
+  </section>
+</main>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     INPUT INFRASTRUCTURE — overlay, toolbar, sidebar, popup, flash
+     ════════════════════════════════════════════════════════════════════ -->
+
+<svg id="anno-draw-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+
+<div id="anno-toolbar" role="toolbar" aria-label="Annotation tools">
+  <button class="anno-mode is-active" data-mode="select" title="Normal scrolling / clicking. Esc returns here." aria-pressed="true"><span class="anno-ico" aria-hidden="true">✋</span><span class="anno-lbl">Select</span></button>
+  <button class="anno-mode" data-mode="comment" title="Highlight text then write a comment (C)"><span class="anno-ico" aria-hidden="true">💬</span><span class="anno-lbl">Comment text</span></button>
+  <button class="anno-mode" data-mode="pin" title="Drop a pinned note on a diagram / table / heading / callout (P)"><span class="anno-ico" aria-hidden="true">📌</span><span class="anno-lbl">Pin spot</span></button>
+  <button class="anno-mode" data-mode="draw" title="Free-form sketch — comment popup opens after each stroke (D)"><span class="anno-ico" aria-hidden="true">✏️</span><span class="anno-lbl">Sketch</span></button>
+  <span class="anno-sep" aria-hidden="true"></span>
+  <button id="anno-undo" title="Undo last annotation (⌘Z)"><span class="anno-ico" aria-hidden="true">↶</span><span class="anno-lbl">Undo</span></button>
+  <button id="anno-toggle-panel" title="Toggle the inputs panel (A)"><span class="anno-ico" aria-hidden="true">📋</span><span class="anno-lbl">Inputs</span> <span id="af-total">0</span></button>
+  <button id="anno-submit" title="POST envelope to this server (⌘↩)">Submit →</button>
+</div>
+
+<aside id="af-panel" aria-label="Inputs panel">
+  <header>
+    <h3>Your inputs</h3>
+    <button id="anno-add-general" title="Add an un-anchored general comment">+ Note</button>
+    <button id="anno-clear" title="Clear all annotations (does not clear form responses)">Clear</button>
+    <button id="anno-panel-close" title="Close panel (A)" aria-label="Close">✕</button>
+  </header>
+
+  <section class="af-panel-section" id="af-section-form">
+    <h4>Questions <span class="af-section-count" id="af-form-count">0</span></h4>
+    <div class="af-panel-body">
+      <ol id="af-form-list"></ol>
+    </div>
+  </section>
+
+  <section class="af-panel-section" id="af-section-anno">
+    <h4>Annotations <span class="af-section-count" id="anno-count">0</span></h4>
+    <div class="af-panel-body">
+      <ol id="af-anno-list"></ol>
+    </div>
+  </section>
+
+  <footer>Stored in <code>localStorage</code>. Submit POSTs the envelope to this server. <kbd>C</kbd> text · <kbd>P</kbd> pin · <kbd>D</kbd> sketch · <kbd>⌘↩</kbd> submit.</footer>
+</aside>
+
+<dialog id="anno-popup">
+  <form method="dialog">
+    <label for="anno-popup-text">Your comment</label>
+    <div id="anno-popup-quote" class="anno-popup-quote" hidden></div>
+    <textarea id="anno-popup-text" rows="3" placeholder="What's the thought? (Markdown OK.)"></textarea>
+    <div class="anno-popup-buttons">
+      <button type="button" id="anno-popup-cancel">Cancel</button>
+      <button type="submit" id="anno-popup-save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="anno-flash" role="status" aria-live="polite"></div>
+
+<!-- perfect-freehand: load via ESM module, expose getStroke on window for the
+     drawing layer below (it polls window.PerfectFreehand.getStroke). -->
+<script type="module">
+  import { getStroke } from './vendor/perfect-freehand.mjs';
+  window.PerfectFreehand = { getStroke };
+</script>
+
+<!-- Mermaid (vendored UMD) for renderable, annotatable diagrams. Pins drop on
+     specific nodes/edges within the rendered SVG via CSS-path selection. -->
+<script src="./vendor/mermaid.min.js"></script>
+<script>
+  if (window.mermaid){
+    window.mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#fff',
+        primaryTextColor: '#16140f',
+        primaryBorderColor: '#3b3730',
+        lineColor: '#3b3730',
+        secondaryColor: '#efe8d9',
+        tertiaryColor: '#fdfaf2',
+        fontFamily: 'Spectral, Iowan Old Style, Georgia, serif',
+        fontSize: '15px'
+      },
+      flowchart: { curve: 'basis', useMaxWidth: true },
+      sequence: { useMaxWidth: true }
+    });
+    // Render after DOM is ready, then notify the annotation layer to resize / re-pin.
+    document.addEventListener('DOMContentLoaded', async () => {
+      try { await window.mermaid.run(); } catch (e){ console.warn('[mermaid] render error', e); }
+      if (window._afOnDiagramsReady) window._afOnDiagramsReady();
+    });
+  }
+</script>
+<script>
+(function(){
+  'use strict';
+  const STORAGE_KEY = 'af:v1:' + location.pathname;
+  const SUBMIT_URL  = '/feedback';
+
+  const state = {
+    mode: 'select',
+    annotations: [],
+    lastAction: null,
+    drawing: { active:false, points:[], pathEl:null, pointerId:null }
+  };
+  const formState = new Map();
+
+  const supportsHighlightAPI = (typeof Highlight !== 'undefined') && (typeof CSS !== 'undefined') && !!CSS.highlights;
+
+  const $  = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const uid = () => 'a-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7);
+  const nowIso = () => new Date().toISOString();
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const drawSvg = $('#anno-draw-svg');
+  const SVGNS = 'http://www.w3.org/2000/svg';
+
+  // ─── persistence ───────────────────────────────────────────────────
+  function saveLocal(){ try { localStorage.setItem(STORAGE_KEY + ':anno', JSON.stringify(state.annotations)); } catch(_){} }
+  function loadLocal(){ try { state.annotations = JSON.parse(localStorage.getItem(STORAGE_KEY + ':anno') || '[]'); } catch(_){ state.annotations = []; } }
+  function saveFormLocal(){
+    try {
+      const obj = {};
+      for (const [k,v] of formState) obj[k] = v;
+      localStorage.setItem(STORAGE_KEY + ':form', JSON.stringify(obj));
+    } catch(_){}
+  }
+  function loadFormLocal(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY + ':form');
+      if (!raw) return;
+      const obj = JSON.parse(raw);
+      Object.entries(obj).forEach(([id, q]) => {
+        if (!formState.has(id)) return;
+        formState.get(id).value = q.value;
+        applyValueToDOM(id, q);
+      });
+    } catch(_){}
+  }
+
+  function applyValueToDOM(id, q){
+    const qEl = document.querySelector('.af-q[data-q-id="' + cssEscape(id) + '"]');
+    if (!qEl) return;
+    const t = q.type;
+    if (t === 'text' || t === 'textarea'){
+      const inp = qEl.querySelector('textarea, input[type="text"]');
+      if (inp && q.value != null) inp.value = q.value;
+    } else if (t === 'radio'){
+      qEl.querySelectorAll('input[type="radio"]').forEach(inp => { inp.checked = (inp.value === q.value); });
+    } else if (t === 'checkbox'){
+      const vals = new Set(q.value || []);
+      qEl.querySelectorAll('input[type="checkbox"]').forEach(inp => { inp.checked = vals.has(inp.value); });
+    }
+  }
+
+  function cssEscape(s){ return (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/"/g, '\\"'); }
+
+  // ─── mode toggle ──────────────────────────────────────────────────
+  function setMode(m){
+    state.mode = m;
+    document.body.dataset.annoMode = m;
+    $$('#anno-toolbar .anno-mode').forEach(b => {
+      const on = b.dataset.mode === m;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    if (m !== 'comment') window.getSelection()?.removeAllRanges();
+  }
+
+  // ─── flash banner ─────────────────────────────────────────────────
+  let flashTimer;
+  function flash(msg, kind='ok', ms=2400){
+    const el = $('#anno-flash');
+    el.textContent = msg;
+    el.classList.remove('is-ok','is-err');
+    el.classList.add(kind === 'err' ? 'is-err' : 'is-ok', 'is-visible');
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => el.classList.remove('is-visible'), ms);
+  }
+
+  // ─── CSS path helper ──────────────────────────────────────────────
+  function cssPath(el){
+    if (!el || el.nodeType !== 1) return '';
+    if (el.id) return '#' + cssEscape(el.id);
+    const parts = [];
+    while (el && el.nodeType === 1 && el !== document.body){
+      let part = el.tagName.toLowerCase();
+      if (el.id){ parts.unshift('#' + cssEscape(el.id)); break; }
+      const parent = el.parentNode;
+      if (!parent){ parts.unshift(part); break; }
+      const siblings = Array.from(parent.children).filter(c => c.tagName === el.tagName);
+      if (siblings.length > 1) part += ':nth-of-type(' + (siblings.indexOf(el)+1) + ')';
+      parts.unshift(part);
+      el = parent;
+    }
+    return parts.join('>');
+  }
+
+  // ─── SVG overlay sizing ───────────────────────────────────────────
+  function sizeDrawSvg(){
+    const w = Math.max(document.documentElement.scrollWidth, window.innerWidth);
+    const h = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+    drawSvg.style.width  = w + 'px';
+    drawSvg.style.height = h + 'px';
+    drawSvg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+  }
+  window.addEventListener('resize', sizeDrawSvg, {passive:true});
+  window.addEventListener('load', () => setTimeout(sizeDrawSvg, 50));
+
+  // ─── text annotation ──────────────────────────────────────────────
+  function ensureNamedHighlight(){
+    if (!supportsHighlightAPI) return null;
+    let shared = CSS.highlights.get('anno-text');
+    if (!shared){ shared = new Highlight(); CSS.highlights.set('anno-text', shared); }
+    return shared;
+  }
+  function addRangeToHighlight(range){
+    const hl = ensureNamedHighlight();
+    if (!hl) return;
+    try { hl.add(range); } catch(_){}
+  }
+  function rebuildHighlights(){
+    const hl = ensureNamedHighlight();
+    if (!hl) return;
+    hl.clear();
+    state.annotations.forEach(a => {
+      const sel = a.target?.selector?.find(s => s.type === 'TextQuoteSelector');
+      if (!sel) return;
+      const range = findRangeForQuote(sel);
+      if (range) hl.add(range);
+    });
+  }
+
+  function findRangeForQuote(sel){
+    const exact = sel.exact; if (!exact) return null;
+    const root = $('#af-content') || document.body;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => {
+        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        let p = n.parentNode;
+        while (p){
+          if (p === drawSvg || (p.id && /^(anno-toolbar|af-panel|anno-popup|anno-flash)$/.test(p.id))) return NodeFilter.FILTER_REJECT;
+          p = p.parentNode;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const chunks = []; let total = 0, node;
+    while ((node = walker.nextNode())){ chunks.push({node, start: total, text: node.nodeValue}); total += node.nodeValue.length; }
+    const full = chunks.map(c => c.text).join('');
+    let idx = -1;
+    if (sel.prefix){
+      const ix = full.indexOf(sel.prefix + exact);
+      if (ix !== -1) idx = ix + sel.prefix.length;
+    }
+    if (idx === -1) idx = full.indexOf(exact);
+    if (idx === -1) return null;
+    return rangeFromGlobalOffset(chunks, idx, idx + exact.length);
+  }
+  function rangeFromGlobalOffset(chunks, gStart, gEnd){
+    let startNode, startOff, endNode, endOff;
+    for (const c of chunks){
+      const cEnd = c.start + c.text.length;
+      if (startNode === undefined && gStart >= c.start && gStart <= cEnd){ startNode = c.node; startOff = gStart - c.start; }
+      if (gEnd >= c.start && gEnd <= cEnd){ endNode = c.node; endOff = gEnd - c.start; break; }
+    }
+    if (!startNode || !endNode) return null;
+    const r = document.createRange();
+    try { r.setStart(startNode, startOff); r.setEnd(endNode, endOff); } catch(_){ return null; }
+    return r;
+  }
+
+  document.addEventListener('mouseup', () => {
+    if (state.mode !== 'comment') return;
+    setTimeout(() => {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) return;
+      const range = sel.getRangeAt(0);
+      const text = range.toString();
+      if (!text || text.trim().length < 1) return;
+      if (range.commonAncestorContainer.parentElement?.closest?.('#anno-toolbar,#af-panel,#anno-popup,.af-q')) return;
+      openCommentPopup({ type:'text', range, text });
+    }, 0);
+  });
+
+  function saveTextAnno({range, text, comment}){
+    window.getSelection()?.removeAllRanges();
+    const root = $('#af-content') || document.body;
+    const before = document.createRange();
+    before.setStart(root, 0); before.setEnd(range.startContainer, range.startOffset);
+    const after = document.createRange();
+    after.setStart(range.endContainer, range.endOffset);
+    after.setEnd(root, root.childNodes.length);
+    const prefix = before.toString().slice(-32);
+    const suffix = after.toString().slice(0, 32);
+    const anno = {
+      id: uid(), type:'Annotation', motivation:'commenting', created: nowIso(),
+      body: [{type:'TextualBody', value: comment, format:'text/plain', purpose:'commenting'}],
+      target: { source: location.href, selector: [{type:'TextQuoteSelector', exact:text, prefix, suffix}] }
+    };
+    state.annotations.push(anno);
+    addRangeToHighlight(range);
+    saveLocal(); refreshUI();
+    flash('Comment saved');
+  }
+
+  // ─── pin annotation ───────────────────────────────────────────────
+  const PIN_SELECTOR = '.diagram, .stack, .tree, .callout, .verdict, table, pre, .persona, img, h2, h3, blockquote, figure, .af-q, .mermaid, .mermaid g.node, .mermaid g.edge, .mermaid g.cluster';
+
+  document.addEventListener('click', (e) => {
+    if (state.mode !== 'pin') return;
+    if (e.target.closest('#anno-toolbar,#af-panel,#anno-popup,#anno-flash')) return;
+    const target = e.target.closest(PIN_SELECTOR);
+    if (!target) return;
+    e.preventDefault(); e.stopPropagation();
+    const rect = target.getBoundingClientRect();
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+    openCommentPopup({ type:'pin', target, xPct, yPct });
+  }, true);
+
+  function savePinAnno({target, xPct, yPct, comment}){
+    const anno = {
+      id: uid(), type:'Annotation', motivation:'commenting', created: nowIso(),
+      body: [{type:'TextualBody', value: comment, format:'text/plain', purpose:'commenting'}],
+      target: {
+        source: location.href,
+        selector: [
+          {type:'CssSelector', value: cssPath(target)},
+          {type:'FragmentSelector', conformsTo:'http://www.w3.org/TR/media-frags/', value:'xywh=percent:' + xPct.toFixed(2) + ',' + yPct.toFixed(2) + ',0,0'}
+        ]
+      }
+    };
+    state.annotations.push(anno);
+    renderPin(anno, target);
+    saveLocal(); refreshUI();
+    flash('Pin saved');
+  }
+  function renderPin(anno, target){
+    if (!target) return;
+    const cs = getComputedStyle(target);
+    if (cs.position === 'static') target.style.position = 'relative';
+    const sel = anno.target.selector.find(s => s.type === 'FragmentSelector');
+    const m = sel?.value?.match(/xywh=percent:([\d.]+),([\d.]+)/);
+    if (!m) return;
+    const pin = document.createElement('div');
+    pin.className = 'anno-pin';
+    pin.dataset.annoId = anno.id;
+    pin.style.left = m[1] + '%'; pin.style.top = m[2] + '%';
+    pin.textContent = pinIndex(anno);
+    pin.title = anno.body[0].value;
+    pin.addEventListener('click', e => { e.stopPropagation(); openCommentPopup({ type:'pin-edit', anno }); });
+    target.appendChild(pin);
+  }
+  function pinIndex(anno){
+    const pins = state.annotations.filter(a => a.target.selector?.some(s => s.type === 'FragmentSelector'));
+    return pins.indexOf(anno) + 1;
+  }
+  function rebuildPins(){
+    $$('.anno-pin').forEach(p => p.remove());
+    state.annotations.forEach(a => {
+      const css = a.target.selector?.find(s => s.type === 'CssSelector');
+      if (!css) return;
+      try { const t = document.querySelector(css.value); if (t) renderPin(a, t); } catch(_){}
+    });
+  }
+
+  // ─── drawing ──────────────────────────────────────────────────────
+  const STROKE_OPTS = { size: 4, thinning: 0.35, smoothing: 0.6, streamline: 0.5, simulatePressure: true, last: true };
+  function getStrokeFn(){ return (window.PerfectFreehand && window.PerfectFreehand.getStroke) || window.getStroke || null; }
+  function strokeToPath(stroke){
+    if (!stroke || stroke.length < 2) return '';
+    let d = 'M ' + stroke[0][0].toFixed(1) + ' ' + stroke[0][1].toFixed(1);
+    for (let i=1; i<stroke.length; i++) d += ' L ' + stroke[i][0].toFixed(1) + ' ' + stroke[i][1].toFixed(1);
+    return d + ' Z';
+  }
+  drawSvg.addEventListener('pointerdown', (e) => {
+    if (state.mode !== 'draw') return;
+    e.preventDefault();
+    drawSvg.setPointerCapture(e.pointerId);
+    state.drawing = { active:true, points:[[e.pageX, e.pageY, e.pressure || 0.5]], pathEl:null, pointerId:e.pointerId };
+    const path = document.createElementNS(SVGNS, 'path');
+    path.setAttribute('fill', 'rgba(199, 86, 64, 0.78)');
+    path.setAttribute('stroke', 'none');
+    drawSvg.appendChild(path);
+    state.drawing.pathEl = path;
+  });
+  drawSvg.addEventListener('pointermove', (e) => {
+    if (!state.drawing.active || e.pointerId !== state.drawing.pointerId) return;
+    state.drawing.points.push([e.pageX, e.pageY, e.pressure || 0.5]);
+    const fn = getStrokeFn();
+    const stroke = fn ? fn(state.drawing.points, STROKE_OPTS) : state.drawing.points.map(p => [p[0], p[1]]);
+    state.drawing.pathEl.setAttribute('d', strokeToPath(stroke));
+  });
+  function finalizeStroke(){
+    if (!state.drawing.active) return;
+    state.drawing.active = false;
+    try { drawSvg.releasePointerCapture(state.drawing.pointerId); } catch(_){}
+    const pts = state.drawing.points, path = state.drawing.pathEl;
+    state.drawing.pathEl = null; state.drawing.points = []; state.drawing.pointerId = null;
+    if (!pts || pts.length < 3 || !path){ path?.remove(); return; }
+    const id = uid();
+    path.dataset.annoId = id;
+    const d = path.getAttribute('d');
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    const bbox = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs)-Math.min(...xs), h: Math.max(...ys)-Math.min(...ys) };
+    const anno = {
+      id, type:'Annotation', motivation:'sketching', created: nowIso(),
+      body: [{type:'TextualBody', value:'', format:'text/plain', purpose:'sketching'}],
+      target: {
+        source: location.href,
+        selector: [{
+          type:'SvgSelector',
+          value: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + drawSvg.clientWidth + ' ' + drawSvg.clientHeight + '"><path d="' + d + '" fill="rgba(199,86,64,0.78)"/></svg>'
+        }]
+      },
+      _bbox: bbox,
+      _viewport: { docW: drawSvg.clientWidth, docH: drawSvg.clientHeight }
+    };
+    state.annotations.push(anno);
+    saveLocal(); refreshUI();
+    openCommentPopup({ type:'sketch', anno });
+  }
+  drawSvg.addEventListener('pointerup',     finalizeStroke);
+  drawSvg.addEventListener('pointercancel', finalizeStroke);
+  drawSvg.addEventListener('pointerleave',  finalizeStroke);
+
+  function rebuildStrokes(){
+    $$('#anno-draw-svg > path[data-anno-id]').forEach(p => p.remove());
+    state.annotations.forEach(a => {
+      if (a.motivation !== 'sketching') return;
+      const sel = a.target.selector?.find(s => s.type === 'SvgSelector');
+      if (!sel) return;
+      const m = sel.value.match(/<path[^>]*d="([^"]+)"/);
+      if (!m) return;
+      const path = document.createElementNS(SVGNS, 'path');
+      path.setAttribute('d', m[1]);
+      path.setAttribute('fill', 'rgba(199, 86, 64, 0.78)');
+      path.setAttribute('stroke', 'none');
+      path.dataset.annoId = a.id;
+      drawSvg.appendChild(path);
+    });
+  }
+
+  // ─── comment popup ────────────────────────────────────────────────
+  let pendingPopup = null;
+  function openCommentPopup(ctx){
+    pendingPopup = ctx;
+    const popup = $('#anno-popup');
+    const ta = $('#anno-popup-text');
+    const quote = $('#anno-popup-quote');
+    quote.hidden = false; ta.value = '';
+    if (ctx.type === 'text'){
+      quote.textContent = '"' + ctx.text.slice(0, 240) + (ctx.text.length > 240 ? '…' : '') + '"';
+    } else if (ctx.type === 'text-edit'){
+      const ts = ctx.anno.target.selector.find(s => s.type === 'TextQuoteSelector');
+      quote.textContent = '"' + (ts?.exact || '').slice(0, 240) + '" — editing';
+      ta.value = ctx.anno.body[0].value || '';
+    } else if (ctx.type === 'pin'){
+      const tag = ctx.target.tagName.toLowerCase();
+      const cls = ctx.target.className ? '.' + String(ctx.target.className).split(/\s+/)[0] : '';
+      quote.textContent = 'Pin on <' + tag + cls + '> at ' + ctx.xPct.toFixed(0) + '%, ' + ctx.yPct.toFixed(0) + '%';
+    } else if (ctx.type === 'pin-edit'){
+      quote.textContent = 'Pin #' + pinIndex(ctx.anno) + ' — editing';
+      ta.value = ctx.anno.body[0].value || '';
+    } else if (ctx.type === 'sketch'){
+      quote.textContent = '✏️ Sketch — describe what it means (or just hit Save to keep the drawing without a note).';
+    } else if (ctx.type === 'sketch-edit'){
+      quote.textContent = '✏️ Sketch — editing';
+      ta.value = ctx.anno.body[0].value || '';
+    } else if (ctx.type === 'general'){
+      quote.textContent = 'General comment — not anchored to any spot.';
+      if (ctx.anno) ta.value = ctx.anno.body[0].value || '';
+    }
+    popup.showModal();
+    setTimeout(() => ta.focus(), 0);
+  }
+  $('#anno-popup-cancel').addEventListener('click', () => { $('#anno-popup').close(); pendingPopup = null; });
+  $('#anno-popup').addEventListener('close', () => { pendingPopup = null; });
+  $('#anno-popup form').addEventListener('submit', (e) => {
+    const ctx = pendingPopup; pendingPopup = null;
+    if (!ctx) return;
+    const text = $('#anno-popup-text').value.trim();
+    const emptyOK = ctx.type === 'sketch' || ctx.type === 'sketch-edit';
+    if (!text && !emptyOK){ flash('Empty comment — not saved', 'err'); return; }
+    if (ctx.type === 'text') saveTextAnno({range: ctx.range, text: ctx.text, comment: text});
+    else if (ctx.type === 'pin') savePinAnno({target: ctx.target, xPct: ctx.xPct, yPct: ctx.yPct, comment: text});
+    else if (ctx.type === 'pin-edit' || ctx.type === 'text-edit' || ctx.type === 'sketch' || ctx.type === 'sketch-edit'){
+      ctx.anno.body[0].value = text;
+      saveLocal(); refreshUI(); flash('Saved');
+      const pinEl = $('.anno-pin[data-anno-id="' + ctx.anno.id + '"]');
+      if (pinEl) pinEl.title = text;
+    }
+    else if (ctx.type === 'general'){
+      if (ctx.anno){ ctx.anno.body[0].value = text; saveLocal(); refreshUI(); flash('Updated'); }
+      else {
+        const anno = { id: uid(), type:'Annotation', motivation:'commenting', created: nowIso(),
+          body: [{type:'TextualBody', value:text, format:'text/plain', purpose:'commenting'}],
+          target: { source: location.href } };
+        state.annotations.push(anno); saveLocal(); refreshUI(); flash('General comment added');
+      }
+    }
+  });
+
+  // ─── form-question discovery ──────────────────────────────────────
+  function emptyValue(type){ return type === 'checkbox' ? [] : ''; }
+  function discoverQuestions(){
+    document.querySelectorAll('.af-q').forEach(q => {
+      const id = q.dataset.qId;
+      if (!id) { console.warn('[af] .af-q without data-q-id — skipping', q); return; }
+      const type = q.dataset.qType || inferType(q);
+      const prompt = q.dataset.qPrompt || (q.querySelector('.af-q-label, legend')?.textContent || '').trim();
+      formState.set(id, { id, type, prompt, value: emptyValue(type) });
+      wireQuestion(q, id, type);
+    });
+    // Inject an auto-explainer below each action-type question so users understand
+    // clicking one submits the FULL envelope (form answers + annotations), not just
+    // the decision itself.
+    document.querySelectorAll('.af-q[data-q-type="action"]').forEach(qEl => {
+      if (qEl.querySelector('.af-q-action-note')) return; // don't duplicate if agent already added one
+      const note = document.createElement('div');
+      note.className = 'af-q-action-note';
+      note.innerHTML = '<strong>Clicking any of these submits everything</strong> — your decision plus all current form answers and annotations, in one envelope. Same effect as the Submit → button in the top-right toolbar, with the decision recorded.';
+      const actions = qEl.querySelector('.af-q-actions');
+      if (actions) actions.insertAdjacentElement('afterend', note); else qEl.appendChild(note);
+    });
+
+    document.querySelectorAll('.af-action').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const value = btn.dataset.value || btn.textContent.trim();
+        const label = btn.dataset.label || btn.textContent.trim();
+        const qEl = btn.closest('.af-q');
+        const qid = qEl?.dataset.qId || '_action';
+        const prompt = qEl?.dataset.qPrompt || (qEl?.querySelector('.af-q-label, legend')?.textContent || 'Action').trim();
+        state.lastAction = { id: qid, value, label, prompt };
+        saveFormLocal();
+        refreshUI();
+        submitEnvelope({ triggeredBy: 'action', actionLabel: label });
+      });
+    });
+  }
+  function inferType(q){
+    if (q.querySelector('textarea')) return 'textarea';
+    if (q.querySelector('input[type="radio"]')) return 'radio';
+    if (q.querySelector('input[type="checkbox"]')) return 'checkbox';
+    if (q.querySelector('input[type="text"]')) return 'text';
+    if (q.querySelector('.af-action')) return 'action';
+    return 'text';
+  }
+  function wireQuestion(qEl, id, type){
+    qEl.querySelectorAll('textarea, input[type="text"]').forEach(inp => {
+      inp.addEventListener('input', () => { formState.get(id).value = inp.value; saveFormLocal(); refreshUI(); });
+    });
+    qEl.querySelectorAll('input[type="radio"]').forEach(inp => {
+      inp.addEventListener('change', () => { if (inp.checked){ formState.get(id).value = inp.value; saveFormLocal(); refreshUI(); }});
+    });
+    qEl.querySelectorAll('input[type="checkbox"]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        const cur = new Set(formState.get(id).value || []);
+        if (inp.checked) cur.add(inp.value); else cur.delete(inp.value);
+        formState.get(id).value = Array.from(cur);
+        saveFormLocal(); refreshUI();
+      });
+    });
+  }
+  function questionIsAnswered(q){
+    if (q.type === 'checkbox') return (q.value || []).length > 0;
+    return q.value != null && q.value !== '';
+  }
+
+  // ─── sidebar render ───────────────────────────────────────────────
+  function refreshUI(){
+    const qs = Array.from(formState.values()).filter(q => q.id !== '_action');
+    const answered = qs.filter(questionIsAnswered);
+    $('#af-form-count').textContent = answered.length + '/' + qs.length;
+    $('#anno-count').textContent = state.annotations.length;
+    $('#af-total').textContent = answered.length + state.annotations.length;
+
+    $('#af-form-list').innerHTML = qs.map(q => {
+      const empty = !questionIsAnswered(q);
+      const display = q.type === 'checkbox' ? (q.value || []).join(', ') : (q.value || '');
+      return '<li>'
+        + '<div class="af-fl-prompt">' + esc(q.prompt) + '<span class="af-fl-type">' + esc(q.type) + '</span></div>'
+        + '<div class="af-fl-value' + (empty ? ' is-empty' : '') + '">' + (empty ? '(not answered yet)' : esc(display)) + '</div>'
+        + '</li>';
+    }).join('');
+
+    const list = $('#af-anno-list');
+    list.innerHTML = state.annotations.map(a => {
+      const selectors = a.target?.selector || [];
+      const isText = selectors.some(s => s.type === 'TextQuoteSelector');
+      const isPin  = selectors.some(s => s.type === 'FragmentSelector');
+      const isDraw = a.motivation === 'sketching';
+      const isGen  = !isText && !isPin && !isDraw;
+      const kind = isDraw ? '✏️ Sketch' : isPin ? '📌 Pin' : isText ? '💬 Text' : isGen ? '🗒 General' : '·';
+      const quoteSel = selectors.find(s => s.type === 'TextQuoteSelector');
+      const quote = quoteSel ? quoteSel.exact.slice(0, 80) : '';
+      const body = (a.body?.[0]?.value) || '';
+      const time = new Date(a.created).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      return '<li data-id="' + a.id + '">'
+        + '<div class="anno-li-head"><span class="kind">' + kind + '</span>'
+        +   '<time>' + time + '</time>'
+        +   '<button class="anno-li-edit" data-id="' + a.id + '" title="Edit">✎</button>'
+        +   '<button class="anno-li-del" data-id="' + a.id + '" title="Delete">✕</button>'
+        + '</div>'
+        + (quote ? '<div class="anno-li-quote">"' + esc(quote) + (quoteSel.exact.length>80?'…':'') + '"</div>' : '')
+        + '<div class="anno-li-body">' + esc(body) + '</div>'
+        + '</li>';
+    }).join('');
+    list.querySelectorAll('.anno-li-del').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); deleteAnnotation(b.dataset.id); }));
+    list.querySelectorAll('.anno-li-edit').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); editAnnotation(b.dataset.id); }));
+    list.querySelectorAll('li').forEach(li => li.addEventListener('click', () => focusAnnotation(li.dataset.id)));
+  }
+
+  function focusAnnotation(id){
+    const a = state.annotations.find(x => x.id === id); if (!a) return;
+    if (a.motivation === 'sketching'){
+      window.scrollTo({top: Math.max(0, (a._bbox?.y || 0) - 80), behavior:'smooth'});
+      const path = $('#anno-draw-svg path[data-anno-id="' + id + '"]');
+      if (path){ const orig = path.getAttribute('fill'); path.setAttribute('fill', 'rgba(47,116,102,0.85)'); setTimeout(() => path.setAttribute('fill', orig), 900); }
+      return;
+    }
+    const pin = $('.anno-pin[data-anno-id="' + id + '"]');
+    if (pin){ pin.scrollIntoView({block:'center', behavior:'smooth'}); pin.classList.remove('is-flash'); void pin.offsetWidth; pin.classList.add('is-flash'); return; }
+    const quoteSel = a.target.selector?.find(s => s.type === 'TextQuoteSelector');
+    if (quoteSel){
+      const range = findRangeForQuote(quoteSel);
+      if (range){ const rect = range.getBoundingClientRect(); window.scrollTo({top: window.scrollY + rect.top - 120, behavior:'smooth'}); }
+    }
+  }
+  function editAnnotation(id){
+    const a = state.annotations.find(x => x.id === id); if (!a) return;
+    const selectors = a.target?.selector || [];
+    if (a.motivation === 'sketching') openCommentPopup({type:'sketch-edit', anno:a});
+    else if (selectors.some(s => s.type === 'FragmentSelector')) openCommentPopup({type:'pin-edit', anno:a});
+    else if (selectors.some(s => s.type === 'TextQuoteSelector')) openCommentPopup({type:'text-edit', anno:a});
+    else openCommentPopup({type:'general', anno:a});
+  }
+  function deleteAnnotation(id){
+    state.annotations = state.annotations.filter(a => a.id !== id);
+    saveLocal(); rebuildPins(); rebuildStrokes(); rebuildHighlights(); refreshUI();
+    flash('Deleted');
+  }
+
+  // ─── submit ───────────────────────────────────────────────────────
+  async function submitEnvelope(opts){
+    opts = opts || {};
+    const btn = $('#anno-submit');
+    btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Sending…';
+    const envelope = {
+      document: { url: location.href, title: document.title, submittedAt: nowIso(), userAgent: navigator.userAgent },
+      form_responses: Array.from(formState.values()).filter(q => q.id !== '_action'),
+      action: state.lastAction || null,
+      annotations: state.annotations,
+      submittedAt: nowIso(),
+      triggeredBy: opts.triggeredBy || 'submit'
+    };
+    try {
+      const res = await fetch(SUBMIT_URL, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(envelope)
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const out = await res.json();
+      const ansN = envelope.form_responses.filter(questionIsAnswered).length;
+      const annN = envelope.annotations.length;
+      const actSuffix = opts.actionLabel ? ' · decision: ' + opts.actionLabel : '';
+      flash('Submitted · ' + ansN + ' answers · ' + annN + ' annotations' + actSuffix);
+      if (confirm('Submitted. Clear inputs for next round?')){
+        state.annotations = []; saveLocal();
+        for (const q of formState.values()) q.value = emptyValue(q.type);
+        document.querySelectorAll('.af-q textarea, .af-q input').forEach(inp => {
+          if (inp.type === 'radio' || inp.type === 'checkbox') inp.checked = false;
+          else inp.value = '';
+        });
+        saveFormLocal();
+        rebuildPins(); rebuildStrokes(); rebuildHighlights(); refreshUI();
+      }
+    } catch (err){
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(envelope, null, 2));
+        flash('Server offline (' + err.message + ') — envelope copied to clipboard', 'err', 4500);
+      } catch(_){
+        const blob = new Blob([JSON.stringify(envelope, null, 2)], {type:'application/json'});
+        window.open(URL.createObjectURL(blob), '_blank');
+        flash('Server offline — envelope opened in new tab', 'err', 4500);
+      }
+    } finally {
+      btn.disabled = false; btn.textContent = orig;
+    }
+  }
+
+  // ─── toolbar wiring ───────────────────────────────────────────────
+  $$('#anno-toolbar .anno-mode').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  $('#anno-submit').addEventListener('click', () => submitEnvelope({triggeredBy:'submit'}));
+  $('#anno-toggle-panel').addEventListener('click', () => { const p = $('#af-panel'); p.hidden = !p.hidden; });
+  $('#anno-panel-close').addEventListener('click', () => { $('#af-panel').hidden = true; });
+  $('#anno-undo').addEventListener('click', () => {
+    const last = state.annotations.pop(); if (!last) return;
+    saveLocal(); rebuildPins(); rebuildStrokes(); rebuildHighlights(); refreshUI();
+    flash('Undid last annotation');
+  });
+  $('#anno-clear').addEventListener('click', () => {
+    if (state.annotations.length === 0) return;
+    if (!confirm('Delete all ' + state.annotations.length + ' annotations? (Form responses are kept.)')) return;
+    state.annotations = []; saveLocal();
+    rebuildPins(); rebuildStrokes(); rebuildHighlights(); refreshUI();
+    flash('Annotations cleared');
+  });
+  $('#anno-add-general').addEventListener('click', () => openCommentPopup({type:'general'}));
+
+  // Section collapse
+  $$('#af-panel .af-panel-section h4').forEach(h => h.addEventListener('click', () => h.parentElement.classList.toggle('is-collapsed')));
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    if (e.target.matches('input,textarea')) return;
+    if (e.key === 'Escape') setMode('select');
+    else if (e.key.toLowerCase() === 'c' && !e.metaKey && !e.ctrlKey) setMode('comment');
+    else if (e.key.toLowerCase() === 'p' && !e.metaKey && !e.ctrlKey) setMode('pin');
+    else if (e.key.toLowerCase() === 'd' && !e.metaKey && !e.ctrlKey) setMode('draw');
+    else if (e.key.toLowerCase() === 'a' && !e.metaKey && !e.ctrlKey){ $('#anno-toggle-panel').click(); }
+    else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ e.preventDefault(); submitEnvelope({triggeredBy:'submit'}); }
+    else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); $('#anno-undo').click(); }
+  });
+
+  // ─── init ─────────────────────────────────────────────────────────
+  function init(){
+    discoverQuestions();
+    loadLocal();
+    loadFormLocal();
+    sizeDrawSvg();
+    setTimeout(sizeDrawSvg, 200);
+    rebuildPins();
+    rebuildStrokes();
+    rebuildHighlights();
+    refreshUI();
+
+    const total = state.annotations.length + Array.from(formState.values()).filter(questionIsAnswered).length;
+    $('#af-panel').hidden = total === 0 && formState.size === 0;
+    if (total > 0) flash('Restored ' + total + ' input(s) from this device');
+  }
+  // Expose a hook so the Mermaid loader can re-size after async render
+  window._afOnDiagramsReady = function(){
+    sizeDrawSvg();
+    // Re-mount pins anchored to Mermaid-rendered SVG nodes (they didn't exist at first init)
+    rebuildPins();
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+</body>
+</html>

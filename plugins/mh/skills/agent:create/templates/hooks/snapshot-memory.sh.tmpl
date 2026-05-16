@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Claude Code PreCompact hook — snapshots agent durable state before compaction
+# loses anything not re-injected.
+#
+# Wired into .claude/settings.json by `mh:agent:create --with-hooks`. Receives
+# the hook JSON envelope on stdin (`session_id`, `transcript_path`,
+# `$CLAUDE_PROJECT_DIR`, …).
+
+set -euo pipefail
+
+AGENT_NAME="{{NAME}}"
+STORE_DIR="${CLAUDE_PROJECT_DIR:-$PWD}/.agents/${AGENT_NAME}"
+SNAPSHOT_ROOT="${STORE_DIR}/cache/snapshots"
+STAMP="$(date +%Y-%m-%d-%H%M%S)"
+SNAP_DIR="${SNAPSHOT_ROOT}/${STAMP}"
+
+mkdir -p "${SNAP_DIR}"
+
+# Copy the agent's durable memory files. Missing files are silently skipped
+# (the agent may not have written them yet).
+for f in \
+  "${STORE_DIR}/memory/critical_facts.md" \
+  "${STORE_DIR}/memory/INDEX.md" \
+  "${STORE_DIR}/memory/what-works.md" \
+  "${STORE_DIR}/memory/decisions.md" \
+  "${STORE_DIR}/memory/failures.md" \
+  "${STORE_DIR}/memory/DREAMS.md" \
+  "${STORE_DIR}/log.md" \
+  "${STORE_DIR}/tasks/open-tasks.md"; do
+  [ -f "$f" ] && cp -p "$f" "${SNAP_DIR}/"
+done
+
+# Keep only the most recent 20 snapshots. `ls -1t` is POSIX-compatible.
+ls -1t "${SNAPSHOT_ROOT}" 2>/dev/null | tail -n +21 | while read -r old; do
+  rm -rf "${SNAPSHOT_ROOT:?}/${old}"
+done
+
+exit 0

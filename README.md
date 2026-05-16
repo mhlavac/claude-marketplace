@@ -9,7 +9,7 @@ rich artifacts and multi-turn iteration loops.
 
 | Plugin | Skills | What it does |
 |---|---|---|
-| [`mh`](plugins/mh) | `mh:annotated-feedback` | Personal skill bundle — see the [plugin README](plugins/mh/README.md) for the current skill list. |
+| [`mh`](plugins/mh) | `mh:annotated-feedback`, `mh:agent:create`, `mh:agent:audit`, `mh:agent:dream` | Personal skill bundle — see the [plugin README](plugins/mh/README.md) for the current skill list. |
 
 ## Install
 
@@ -42,6 +42,9 @@ description when the agent decides they fit.
 See each skill's `SKILL.md` and `README.md` for details:
 
 - [`mh:annotated-feedback`](plugins/mh/skills/annotated-feedback/README.md)
+- [`mh:agent:create`](plugins/mh/skills/agent:create/README.md)
+- [`mh:agent:audit`](plugins/mh/skills/agent:audit/README.md)
+- [`mh:agent:dream`](plugins/mh/skills/agent:dream/README.md)
 
 ## Compatibility
 

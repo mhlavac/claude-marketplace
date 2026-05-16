@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Claude Code SessionEnd hook — drops a chronology line so the agent has
+# evidence the session happened. The deeper self-curation (importance scoring,
+# cross-linking, what-works/failures appends) is the agent's responsibility
+# during the session — this hook only writes what the agent forgot.
+#
+# Wired into .claude/settings.json by `mh:agent:create --with-hooks`.
+
+set -euo pipefail
+
+AGENT_NAME="{{NAME}}"
+STORE_DIR="${CLAUDE_PROJECT_DIR:-$PWD}/.agents/${AGENT_NAME}"
+LOG_FILE="${STORE_DIR}/log.md"
+NOW="$(date +%Y-%m-%d\ %H:%M)"
+
+# Read hook JSON envelope to extract session_id / transcript_path. The hook
+# degrades gracefully if `jq` is not installed.
+SESSION_ID=""
+if command -v jq >/dev/null 2>&1; then
+  PAYLOAD="$(cat || true)"
+  SESSION_ID="$(printf '%s' "$PAYLOAD" | jq -r '.session_id // empty' 2>/dev/null || true)"
+fi
+
+# Append a minimal chronology line if log.md exists. The agent should overwrite
+# it with a meaningful one during in-session self-curation; this is a fallback.
+if [ -f "${LOG_FILE}" ]; then
+  if [ -n "${SESSION_ID}" ]; then
+    echo "## [${NOW}] session-end | (auto, session ${SESSION_ID:0:8})" >> "${LOG_FILE}"
+  else
+    echo "## [${NOW}] session-end | (auto)" >> "${LOG_FILE}"
+  fi
+fi
+
+exit 0

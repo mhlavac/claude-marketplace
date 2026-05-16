@@ -1,0 +1,24 @@
+## {{STAMP}} — consolidation
+
+- duration: {{DURATION}}m
+- before: {{BEFORE_ENTRIES}} entries / {{BEFORE_LINES}} lines / avg importance {{BEFORE_AVG_IMP}}
+- after:  {{AFTER_ENTRIES}} entries / {{AFTER_LINES}} lines / avg importance {{AFTER_AVG_IMP}}
+
+### dropped (-{{DROPPED_COUNT}})
+<!-- one bullet per dropped entry, "<slug>" — reason -->
+{{DROPPED_LIST}}
+
+### merged (-{{MERGED_COUNT}})
+<!-- "<a-slug>" + "<b-slug>" → "<kept-slug>" — reason -->
+{{MERGED_LIST}}
+
+### promoted episodic → semantic (+{{PROMOTED_COUNT}})
+<!-- entries that recurred enough to become a `_shared/<topic>.md` framework -->
+{{PROMOTED_LIST}}
+
+### enhanced / rescored (~{{ENHANCED_COUNT}})
+<!-- "<slug>" — old importance → new importance, reason -->
+{{ENHANCED_LIST}}
+
+### rationale
+{{RATIONALE}}

@@ -1,0 +1,42 @@
+# {{NAME_TITLE}} — Deep Memory Index
+
+Pointers into `.agents/{{NAME}}/memory/`. This is the deeper index — the
+auto-injected `MEMORY.md` stays short and points here for anything more than
+a one-liner.
+
+## Always-loaded
+
+- `PRIVACY.md` — privacy posture (boot step 1)
+- `critical_facts.md` — ≤200-token distillation (boot step 2)
+
+## Profile / state files
+
+<!-- TODO: per-topic profile files this agent maintains. Examples:
+       - `<subject>/profile.md` — identity, role, current state
+       - `<subject>/values.md` — what matters, decision lens
+       - `<subject>/plan.md` — current plan
+       - `<subject>/snapshot.md` — current state (buckets only)
+     Add one section per "subject" the agent serves. -->
+
+## Pattern / framework files
+
+- `_shared/<framework>.md` — <!-- TODO: list shared frameworks the agent loads on demand -->
+
+## Append-only logs (importance-scored, cross-linked)
+
+All entries below carry YAML frontmatter with `importance: 1-10`,
+`captured: YYYY-MM-DD`, `tags: [...]`. New entries cross-link to entries
+they refine/supersede.
+
+- `what-works.md` — patterns / rituals that landed (Generative Agents importance scoring)
+- `what-doesnt.md` — what bounced (low-information sibling of failures.md)
+- `failures.md` — failure attribution with explicit *why* (Reflexion pattern)
+- `decisions.md` — closed decisions, rationale, supersession links
+
+## Consolidation history
+
+- `DREAMS.md` — every `mh:agent:dream` pass leaves an entry: counts before/after, what was dropped/merged/promoted/enhanced, rationale.
+
+## Chronology
+
+- `../log.md` (sibling of `memory/`, not inside it) — append-only `## [YYYY-MM-DD HH:MM] kind | title` per session.

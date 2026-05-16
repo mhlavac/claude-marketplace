@@ -1,0 +1,33 @@
+# {{NAME_TITLE}} — Decisions
+
+Closed decisions. Append-only with importance-scoring, cross-linked when
+related decisions are superseded.
+
+**Format per entry:**
+
+```markdown
+## <slug-of-decision>
+\`\`\`yaml
+importance: 1-10
+captured: YYYY-MM-DD
+tags: [tag1, tag2]
+status: open | closed | superseded
+superseded_by: <other-slug>    # if status is superseded
+\`\`\`
+
+**Question:** <what we were deciding>
+
+**Choice:** <what was chosen>
+
+**Rationale:** <why — 2–3 sentences, the durable reasoning>
+
+**Trigger to revisit:** <what would make us reconsider>
+```
+
+**Cross-link on write (A-MEM):** When you close a decision that contradicts
+an earlier one, find the earlier entry and set `status: superseded` +
+`superseded_by: <this-slug>`. Don't delete — the audit trail is the point.
+
+---
+
+<!-- Real entries will be appended below. -->

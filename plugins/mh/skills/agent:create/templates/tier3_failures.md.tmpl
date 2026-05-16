@@ -1,0 +1,33 @@
+# {{NAME_TITLE}} — Failure attribution
+
+Append-only log of what *didn't* work, with the **explicit why**. Reflexion
+(Shinn 2023) finding: failure attribution moves the needle more than success
+summaries. Most agents skip this — don't.
+
+**Format per entry:**
+
+```markdown
+## <slug-of-what-failed>
+\`\`\`yaml
+importance: 1-10
+captured: YYYY-MM-DD
+tags: [tag1, tag2]
+attribution: behavior | knowledge | timing | tooling | other
+\`\`\`
+
+**What I tried:** <one or two sentences>
+
+**Why it failed:** <the actual cause — not "didn't work" but "user wasn't
+ready for X because Y", "the tool returned partial data so I drew wrong
+conclusion", "rushed past the values question and lost trust">
+
+**What to do differently:** <one concrete adjustment>
+```
+
+The dream pass keeps high-importance failures forever and demotes/drops
+low-importance ones. Repeated failures of the same `attribution` category
+get promoted to `_shared/` as a pattern.
+
+---
+
+<!-- Real entries will be appended below. -->

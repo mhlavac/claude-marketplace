@@ -1,0 +1,32 @@
+# {{NAME_TITLE}} — Dream log (consolidation history)
+
+Written by `mh:agent:dream`. Each entry is one consolidation pass over
+`memory/`. **Append-only.** Do not edit historical entries — they are the
+audit trail for what was merged, dropped, promoted, or enhanced.
+
+**Why this exists:** Sleep-time-Compute (Letta, 2025) showed ~5× compute
+reduction + 13% accuracy from a periodic re-read-and-rewrite of memory.
+This file is where those passes leave a trace.
+
+**Format per entry:**
+
+```markdown
+## YYYY-MM-DD-HHMM — consolidation
+- duration: Nm
+- before: N entries / X lines / avg importance K.K
+- after:  M entries / Y lines / avg importance K.K
+- dropped (-N):
+  - "<entry slug>" — reason
+- merged (-N):
+  - "<a>" + "<b>" → "<a>" — reason
+- promoted (episodic → semantic, +N):
+  - "<entry slug>" — reason
+- enhanced / rescored (~N):
+  - "<entry slug>" — old importance → new importance, reason
+- rationale: <2-3 sentences>
+```
+
+---
+
+<!-- Dream entries will be appended below by `mh:agent:dream`.
+     Do not delete or reorder. -->

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Claude Code SessionStart hook — emits `additionalContext` JSON pointing at
+# the agent's curated state files. Ensures they're re-injected even on
+# `source: "compact"` resume, which would otherwise lose them.
+#
+# Wired into .claude/settings.json by `mh:agent:create --with-hooks`.
+
+set -euo pipefail
+
+AGENT_NAME="{{NAME}}"
+STORE_DIR="${CLAUDE_PROJECT_DIR:-$PWD}/.agents/${AGENT_NAME}"
+
+# Emit JSON that Claude Code reads as additionalContext. Keys must be absolute
+# paths or paths relative to the workspace; values are the labels Claude shows.
+cat <<EOF
+{
+  "additionalContext": {
+    "${STORE_DIR}/memory/PRIVACY.md": "${AGENT_NAME} — privacy posture",
+    "${STORE_DIR}/memory/critical_facts.md": "${AGENT_NAME} — critical facts",
+    "${STORE_DIR}/memory/INDEX.md": "${AGENT_NAME} — deep memory index",
+    "${STORE_DIR}/log.md": "${AGENT_NAME} — recent chronology"
+  }
+}
+EOF
+
+exit 0

@@ -1,0 +1,43 @@
+# {{NAME_TITLE}} — What works
+
+Append-only log of patterns/rituals/methods that *landed* with this user.
+Generative Agents pattern: every entry is **importance-scored at moment of
+capture**.
+
+**Format per entry:**
+
+```markdown
+## <slug-readable-title>
+\`\`\`yaml
+importance: 1-10        # 1 = trivial, 10 = load-bearing
+captured: YYYY-MM-DD
+tags: [tag1, tag2]
+\`\`\`
+
+<2–5 lines of what actually worked, in concrete terms — what was tried,
+what landed, what the user said.>
+```
+
+The dream pass uses `importance` for eviction protection (high = keep, low =
+candidate for drop) and `tags` for cross-link discovery.
+
+**Cross-link on write (A-MEM):** Before you append, scan this file for prior
+entries that contradict or refine the new one. If found, edit them — add
+`superseded_by: <new-slug>` to their frontmatter, or refine their content.
+Never append blindly.
+
+---
+
+<!-- Real entries will be appended below. Example to delete:
+
+## short-bulleted-summaries-land
+\`\`\`yaml
+importance: 7
+captured: YYYY-MM-DD
+tags: [output-format, status-check]
+\`\`\`
+
+For weekly status checks, 3–5 short bullets land better than narrative prose —
+the user reads bullets, skims prose. Keep narrative for retrospectives only.
+
+-->

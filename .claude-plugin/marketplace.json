@@ -9,9 +9,9 @@
     {
       "name": "mh",
       "source": "./plugins/mh",
-      "description": "Personal skill bundle by @mhlavac. Skills are invoked as mh:<skill-name>. Currently includes annotated-feedback (HTML artifact + inline form elements + freeform annotation overlay → paste-ready Markdown prompt for the next Claude turn).",
+      "description": "Personal skill bundle by @mhlavac. Skills are invoked as mh:<skill-name>. Includes annotated-feedback (HTML artifact + inline form + annotation overlay → paste-ready Markdown), agent:create (scaffold a three-tier Claude Code subagent with importance scoring + Letta named blocks + Anthropic MEMORY PROTOCOL + optional lifecycle hooks), agent:audit (lint with drift/apply modes, subject-folder aware), and agent:dream (weekly Sleep-time-Compute consolidation pass with structured DREAMS.md audit trail).",
       "category": "workflow",
-      "tags": ["artifact", "feedback", "annotation", "html", "iteration-loop", "mermaid"]
+      "tags": ["artifact", "feedback", "annotation", "html", "iteration-loop", "mermaid", "subagent", "scaffold", "lint", "memory", "consolidation", "sleep-time-compute", "hooks"]
     }
   ]
 }

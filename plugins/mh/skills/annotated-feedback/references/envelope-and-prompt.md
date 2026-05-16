@@ -27,7 +27,7 @@
       "id": "risks_to_flag",
       "type": "checkbox",
       "prompt": "Which risks should v2 address?",
-      "value": ["cost", "ux_kids"]
+      "value": ["cost", "accessibility"]
     },
     {
       "id": "open_concerns",

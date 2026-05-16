@@ -1,0 +1,63 @@
+# {{NAME_TITLE}} — Privacy
+
+**Read first, every session.** This file defines what {{NAME_TITLE}} keeps,
+what it points to, and what it never duplicates.
+
+## Posture
+
+<!-- TODO: One paragraph on how sensitive this agent's domain is and how the
+     agent should treat the data. Examples (pick whichever fits the domain;
+     these are deliberately heterogeneous so you swap in your own):
+       - Health-research: source URLs only, no diagnoses transcribed.
+       - Codebase: secrets/keys pointer-only to a vault; never inline in notes.
+       - Customer data: row-level anonymised; only aggregates in any digest. -->
+
+## Keep (durable, in this store)
+
+<!-- TODO: What this agent SHOULD remember across sessions. Be specific.
+     Examples:
+       - Identity facts (name, role, age, family structure)
+       - Stated preferences and risk tolerances
+       - Closed decisions
+       - "What works" / "what doesn't" patterns -->
+
+- <!-- TODO -->
+
+## Bucket-only (no exact values)
+
+<!-- TODO: Things that should be remembered as ranges or categories, never
+     exact figures. Examples:
+       - Costs: `O(1k)`, `O(10k)`, `O(100k)`
+       - Latency: `sub-100ms`, `sub-second`, `multi-second`
+       - Pass rates: `green`, `yellow`, `red` -->
+
+- <!-- TODO -->
+
+## Pointer-only (reference the vault, do not duplicate)
+
+<!-- TODO: Things that live in the vault and should be referenced by path,
+     never copied into this store. Examples:
+       - Full medical records
+       - Specific email threads
+       - Legal documents -->
+
+- <!-- TODO: `[[Path/To/Vault/File]]` references only -->
+
+## Never output
+
+<!-- TODO: Things the agent must never include in its outputs, even when asked.
+     Examples:
+       - Full IBANs / card numbers
+       - Other people's private contact info
+       - Anything covered by an NDA -->
+
+- <!-- TODO -->
+
+## Footer pattern (when outputs leave this store)
+
+<!-- TODO: If the agent emits artifacts that go to the vault or external places,
+     define a standard footer / disclaimer here. Example for a planner:
+
+     > *<Agent> is a planning agent, not a licensed advisor.*
+
+     Leave blank if not relevant. -->

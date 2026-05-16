@@ -1,0 +1,63 @@
+# {{NAME_TITLE}} — Memory Index
+
+<!-- Auto-loads on every spawn. Keep ≤80 lines. Detail in `.agents/{{NAME}}/memory/`. -->
+
+I'm **{{NAME_TITLE}}** — {{ROLE}}.
+Voice: {{VOICE}} · Anchor: *{{ANCHOR}}*
+
+## Boot sequence
+
+1. `.agents/{{NAME}}/memory/PRIVACY.md` — privacy posture. **Always first.**
+2. `.agents/{{NAME}}/memory/critical_facts.md` — ≤200-tok state. **Always second.**
+3. `.agents/{{NAME}}/memory/INDEX.md` — deep-store pointers
+4. <!-- TODO: profile / values / plan / snapshot files specific to this agent -->
+5. <!-- TODO: any vault `CLAUDE.md` files (subagents do NOT inherit cascade) -->
+6. `.agents/{{NAME}}/tasks/open-tasks.md` — own backlog
+7. `.agents/{{NAME}}/log.md` — last 20 lines (chronology)
+8. `_shared/<topic>.md` — on demand
+
+## Named blocks (Letta-pattern, edited via Edit tool)
+
+<persona>
+<!-- TODO: 1–2 sentences of identity always in working memory. -->
+</persona>
+
+<critical_facts>
+<!-- Mirror of `memory/critical_facts.md`. Edit when that file changes. -->
+</critical_facts>
+
+<active_threads>
+<!-- 3–6 bullets: what the user is working on with you now. Items >14d move to INDEX.md. -->
+</active_threads>
+
+<open_questions>
+<!-- Things you owe an answer on. One bullet each + date asked. -->
+</open_questions>
+
+<recent_decisions>
+<!-- Last 3 closed decisions, one line each. Older → `memory/decisions.md`. -->
+</recent_decisions>
+
+## Deep memory (pointers only)
+
+- `memory/PRIVACY.md` · `memory/critical_facts.md` · `memory/INDEX.md`
+- `memory/<topic>/` — <!-- TODO: per-topic subfolders -->
+- `memory/_shared/` — frameworks (on demand)
+- `memory/what-works.md` · `what-doesnt.md` · `failures.md` · `decisions.md` — append-only, importance-scored
+- `memory/DREAMS.md` — consolidation history (written by `mh:agent:dream`)
+- `tasks/open-tasks.md` · `sessions/YYYY-MM-DD-<scope>.md` · `log.md`
+
+## Self-curation
+
+End every session: importance-score writes · failure attribution · cross-link
+on write · Two-Output Rule · `log.md` line · task hygiene · ≤80-line check.
+Full rubric: `.claude/agents/{{NAME}}.md` → Self-curation.
+
+## Consolidation
+
+Run `mh:agent:dream --name {{NAME}}` weekly. Re-reads `memory/`, merges
+duplicates, promotes recurring patterns, demotes stale entries → appends
+to `DREAMS.md`.
+
+---
+*Full definition: `.claude/agents/{{NAME}}.md`. Detail: `.agents/{{NAME}}/`.*

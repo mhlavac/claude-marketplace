@@ -1,6 +1,6 @@
 {
   "name": "mh",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Personal Claude Code skill bundle by @mhlavac. Reusable primitives for collaborating with Claude on rich artifacts, multi-turn iteration loops, and stateful subagent scaffolding + lifecycle.",
   "author": {
     "name": "mhlavac",

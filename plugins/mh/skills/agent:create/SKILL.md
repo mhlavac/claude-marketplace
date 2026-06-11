@@ -102,7 +102,26 @@ The script prints the absolute paths of every file it created and exits 0 on
 success, non-zero with a clear message if a tier already exists (use `--force`
 to overwrite, or pick a different name).
 
-### 3. Review and customize
+### 3. Seed with researched context (encouraged)
+
+Templates give shape; **seeding gives the agent a working first session.**
+If research preceded the scaffold (vault/repo exploration, an intake
+conversation, prior agent handoffs), replace the placeholders with that
+material instead of leaving TODOs for later:
+
+- `memory/critical_facts.md` — seed with dated, researched facts. Add a
+  one-line provenance note ("Seeded YYYY-MM-DD by <who> from <where> at
+  creation. I own this file now.") so the agent knows the baseline is
+  inherited, owned, and editable.
+- Per-topic profile files — quote the user's own words **with dates**; for a
+  coach/planner persona those quotes are worth more than any framework.
+- `tasks/open-tasks.md` — seed with a timely first session if one exists
+  (an upcoming ritual date, a live situation in the agent's lane).
+
+Seeded facts are a snapshot: date everything, and let the agent's own
+self-curation take over from the first real session.
+
+### 4. Review and customize
 
 After the scaffold lands, walk the user through the three files that matter
 most:
@@ -116,7 +135,7 @@ most:
    agent is ever invoked. The template has prompts for what to redact, what to
    keep in buckets, and what to point-to-vault rather than duplicate.
 
-### 4. Run a first audit
+### 5. Run a first audit
 
 After customization, the user can run `mh:agent:audit` (the sister skill in
 this plugin) against the new agent to check that:
@@ -169,6 +188,13 @@ they give shape, not content.
 - **`Subagents do NOT inherit the CLAUDE.md cascade`** is called out in the
   template — boot sequence should explicitly list any CLAUDE.md the agent
   depends on.
+- **Context gaps — elicit, don't assume.** The Tier-1 template has a section
+  naming the domains the memory store systematically under-represents (a
+  personal vault under-represents work life; a work repo under-represents
+  personal constraints). The agent asks 1–2 targeted questions when a session
+  depends on a gap, and writes the answers back the same session so the gap
+  shrinks over time. An agent that treats its store as complete gives
+  confidently stale advice.
 
 ## What the skill does NOT do
 

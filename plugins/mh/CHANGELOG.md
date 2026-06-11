@@ -3,6 +3,26 @@
 All notable changes to the `mh` plugin.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-06-11
+
+Lessons from the first real-world persona built after this toolkit shipped
+(a management coach in the MyNotes vault).
+
+### Changed — `mh:agent:create`
+
+- **New Tier-1 template section: "Context gaps — elicit, don't assume."**
+  Every memory store has blind spots (a personal vault under-represents work
+  life; a work repo under-represents personal constraints). The scaffolded
+  agent now names its known gaps, asks 1–2 targeted questions when a session
+  depends on one, and writes the answers back the same session so the gap
+  shrinks over time.
+- **New flow step: "Seed with researched context (encouraged)."** Templates
+  give shape; seeding gives the agent a working first session. When research
+  preceded the scaffold, replace placeholders with dated facts + a provenance
+  line ("Seeded YYYY-MM-DD by <who> from <where>. I own this file now.")
+  instead of leaving TODOs. User quotes with dates beat frameworks.
+- `tier3_critical_facts.md.tmpl` — example line for a known context gap.
+
 ## [1.1.0] — 2026-05-16
 
 Adds a three-skill subagent toolkit on top of the agent-memory architecture
